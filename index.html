@@ -137,7 +137,7 @@
         <div id="v-search">
             <div class="search-box">🔍<input type="text" id="q-search" placeholder="Số xe hoặc số khung..." oninput="applyFilter()"></div>
             <div class="pills" id="status-pills"></div>
-            <div id="list-search"><div class="empty-msg">Đang chuẩn bị dữ liệu...</div></div>
+            <div id="list-search"><div class="empty-msg">Chưa có dữ liệu hiển thị.</div></div>
         </div>
 
         <!-- VIEW: KIỂM KÊ -->
@@ -193,7 +193,7 @@
         function norm(s) { return String(s||'').replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); }
         function clean(s) { return String(s||'').replace(/\(.*?\)/g, '').replace(/\d{10,}/g, '').trim(); }
 
-        async function openDB() { return new Promise(res => { const r = indexedDB.open('XanhERP_Mini_V2', 1); r.onupgradeneeded = () => r.result.createObjectStore('data'); r.onsuccess = () => res(r.result); }); }
+        async function openDB() { return new Promise(res => { const r = indexedDB.open('XanhERP_Final_V3', 1); r.onupgradeneeded = () => r.result.createObjectStore('data'); r.onsuccess = () => res(r.result); }); }
         async function save(d) { const i = await openDB(); i.transaction('data','readwrite').objectStore('data').put(d, 'db'); }
         async function load() { const i = await openDB(); return new Promise(res => { const r = i.transaction('data').objectStore('data').get('db'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }); }
 
@@ -209,14 +209,27 @@
             try {
                 const res = await fetch(`${GAS}?action=sync`, { redirect: 'follow' });
                 const json = await res.json();
-                if(json.vehicles) { db = json; await save(db); render(); }
-            } catch(e) { console.error(e); }
+                console.log("Dữ liệu nhận được:", json);
+                if(json.error) {
+                    alert("Lỗi từ Google: " + json.error);
+                } else if(json.vehicles) {
+                    db = json; 
+                    await save(db); 
+                    render();
+                    alert("Đồng bộ thành công " + db.vehicles.length + " xe!");
+                } else {
+                    alert("Dữ liệu trống hoặc sai định dạng!");
+                }
+            } catch(e) { 
+                alert("Lỗi kết nối mạng: " + e.message);
+                console.error(e); 
+            }
             finally { document.getElementById('loader').classList.add('hidden'); }
         }
 
         function render() {
             if(!db || !db.vehicles || db.vehicles.length === 0) {
-                document.getElementById('list-search').innerHTML = '<div class="empty-msg">Chưa có dữ liệu. Nhấn 🔄 để tải.</div>';
+                document.getElementById('list-search').innerHTML = '<div class="empty-msg">Chưa có dữ liệu. Hãy nhấn 🔄 để tải từ Google Sheet.</div>';
                 return;
             }
             const sts = ["Tất cả", ...new Set(db.vehicles.map(v => v['Trạng thái cấp 2'] || 'N/A'))];
@@ -238,13 +251,13 @@
 
         function applyFilter() {
             const q = norm(document.getElementById('q-search').value);
-            if(!db.vehicles) return;
+            if(!db.vehicles || db.vehicles.length === 0) return;
             let list = db.vehicles;
             if(curS !== "Tất cả") list = list.filter(v => (v['Trạng thái cấp 2'] || 'N/A') === curS);
             if(q) list = list.filter(v => norm(v['Biển số']).includes(q) || norm(v['Số khung']).includes(q));
             
             if(list.length === 0) {
-                document.getElementById('list-search').innerHTML = '<div class="empty-msg">Không tìm thấy xe nào phù hợp.</div>';
+                document.getElementById('list-search').innerHTML = '<div class="empty-msg">Không tìm thấy xe nào.</div>';
                 return;
             }
 
@@ -302,7 +315,8 @@
                 const res = await fetch(GAS, { method: 'POST', body: JSON.stringify(payload) });
                 const resJ = await res.json();
                 if(resJ.success) { alert("Bàn giao thành công! Ảnh đang được lưu vào Drive..."); syncData(); switchV('history'); }
-            } catch(e) { alert("Lỗi gửi dữ liệu!"); }
+                else { alert("Lỗi từ Google: " + resJ.error); }
+            } catch(e) { alert("Lỗi kết nối mạng!"); }
             finally { document.getElementById('loader').classList.add('hidden'); }
         }
 
