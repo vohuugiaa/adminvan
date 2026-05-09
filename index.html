@@ -84,7 +84,7 @@
     <div class="container">
         <!-- TRA CỨU -->
         <div id="view-search">
-            <div class="sticky-box"><div class="search-container"><i>🔍</i><input type="text" id="q-search" placeholder="Biển số hoặc Số khung..." oninput="applyFilter()"></div></div>
+            <div class="sticky-box"><div class="search-container"><i>🔍</i><input type="text" id="q-search" placeholder="Biển số hoặc Số khung..." oninput="suggestSmart(this, 'suggest-search', 'plate')"><div id="suggest-search" class="suggest-box hidden"></div></div></div>
             <div class="filter-row" id="status-filters"></div>
             <div id="list-search"></div>
         </div>
@@ -95,8 +95,8 @@
             <div class="sticky-box" style="top:150px;">
                 <div class="search-container">
                     <i>🔍</i>
-                    <input type="text" id="q-assets" placeholder="Gõ biển số xe..." oninput="suggestSmart(this, 'suggest-assets', 'plate')">
-                    <div id="suggest-assets" class="suggest-box hidden"></div>
+                    <input type="text" id="q-assets" placeholder="Gõ biển số xe..." oninput="suggestSmart(this, 'suggest-q-assets', 'plate')">
+                    <div id="suggest-q-assets" class="suggest-box hidden"></div>
                 </div>
             </div>
             <div id="display-assets" class="hidden">
@@ -220,17 +220,23 @@
 
         function selectItem(val, bid, type) {
             const id = bid.replace('suggest-', '');
-            document.getElementById(id).value = val;
+            const inputEl = document.getElementById(id);
+            if(inputEl) inputEl.value = val;
             document.querySelectorAll('.suggest-box').forEach(b => b.classList.add('hidden'));
-            if(type === 'plate' && id === 'q-assets') {
+            if(type === 'plate' && (id === 'q-assets' || id === 'h-plate')) {
                 const data = db.assets.find(a => norm(a['Biển số xe']) === norm(val));
                 const its = ["Máy Pos", "Sim", "Thảm cabin", "Thảm sau cốp", "Xe Đẩy Hàng", "Dây Ràng", "Bao tay", "Thẻ định vị"];
-                document.getElementById('plate-title').innerText = val;
-                document.getElementById('items-assets').innerHTML = its.map(it => {
-                    const has = data && data[it] == "1";
-                    return `<div class="list-item" style="padding:15px 0; border-bottom:1px solid #eee;"><span style="font-weight:600;">${it}</span><span style="font-weight:800; color:${has?'var(--ios-green)':'var(--ios-red)'}">${has?'✓ CÓ':'✕ THIẾU'}</span></div>`;
-                }).join('');
-                document.getElementById('display-assets').classList.remove('hidden');
+                const plateTitle = document.getElementById('plate-title');
+                const itemsAssets = document.getElementById('items-assets');
+                if(plateTitle) plateTitle.innerText = val;
+                if(itemsAssets) {
+                    itemsAssets.innerHTML = its.map(it => {
+                        const has = data && data[it] == "1";
+                        return `<div class="list-item" style="padding:15px 0; border-bottom:1px solid #eee;"><span style="font-weight:600;">${it}</span><span style="font-weight:800; color:${has?'var(--ios-green)':'var(--ios-red)'}">${has?'✓ CÓ':'✕ THIẾU'}</span></div>`;
+                    }).join('');
+                }
+                const displayEl = document.getElementById('display-assets');
+                if(displayEl) displayEl.classList.remove('hidden');
             }
         }
 
