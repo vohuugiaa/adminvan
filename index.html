@@ -1,570 +1,314 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Quản Lý Xe Van</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Xanh Pro ERP • Mini</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ios-blue: #007AFF;
-            --ios-bg: #F2F2F7;
-            --ios-card: #FFFFFF;
-            --ios-text: #1C1C1E;
-            --ios-secondary: #8E8E93;
-            --ios-border: #D1D1D6;
-            --ios-green: #34C759;
-            --ios-red: #FF3B30;
+            --primary: #007AFF;
+            --accent: #5856D6;
+            --success: #34C759;
+            --danger: #FF3B30;
+            --bg: #F8F9FB;
+            --card: #FFFFFF;
+            --text: #1D1D1F;
+            --sub: #86868B;
+            --border: rgba(0,0,0,0.05);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-font-smoothing: antialiased;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--ios-bg);
-            color: var(--ios-text);
-            overflow-x: hidden;
+        /* Header Style */
+        header { 
+            padding: 55px 20px 20px; 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(20px); 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 1px solid var(--border);
         }
+        header h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--primary); }
+        .sync-icon { width: 36px; height: 36px; background: #EEF4FF; color: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: 0.3s; }
+        .sync-icon:active { transform: rotate(180deg) scale(0.9); }
 
-        header {
-            padding: 50px 20px 15px;
-            background: rgba(242, 242, 247, 0.8);
-            backdrop-filter: saturate(180%) blur(25px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 0.5px solid var(--ios-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+        .container { padding: 15px 15px 120px; max-width: 480px; margin: 0 auto; }
+        .hidden { display: none !important; }
+
+        /* Search Box */
+        .search-box { 
+            background: var(--card); 
+            border-radius: 18px; 
+            padding: 14px 18px; 
+            display: flex; 
+            align-items: center; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
         }
+        .search-box input { border: none; outline: none; width: 100%; font-size: 16px; font-weight: 500; margin-left: 10px; }
 
-        header h1 {
-            font-size: 34px;
-            font-weight: 800;
-            letter-spacing: -1.2px;
-            color: #000;
-        }
+        /* Pill Filters */
+        .pills { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 20px; padding-bottom: 5px; }
+        .pills::-webkit-scrollbar { display: none; }
+        .pill { padding: 8px 16px; background: #E9E9EB; border-radius: 100px; font-size: 13px; font-weight: 600; color: #555; white-space: nowrap; cursor: pointer; }
+        .pill.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(0,122,255,0.3); }
 
-        .btn-sync {
-            background: white;
-            color: var(--ios-blue);
-            border: none;
-            padding: 10px 16px;
-            border-radius: 22px;
-            font-size: 14px;
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        /* Elegant Cards */
+        .card { 
+            background: var(--card); 
+            border-radius: 20px; 
+            padding: 16px; 
+            margin-bottom: 12px; 
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
             transition: 0.2s;
         }
+        .card:active { transform: scale(0.98); background: #FAFAFA; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .plate-no { font-size: 17px; font-weight: 800; letter-spacing: 0.5px; }
+        .tag { font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; }
+        .tag-blue { background: #E1F0FF; color: #007AFF; }
+        .tag-green { background: #E1F8E9; color: #28A745; }
+        .tag-red { background: #FFE5E5; color: #DC3545; }
+        .sub-info { font-size: 13px; color: var(--sub); font-weight: 500; }
 
-        .btn-sync:active {
-            transform: scale(0.92);
-            opacity: 0.8;
-        }
+        /* Form Controls */
+        .form-section { background: var(--card); border-radius: 20px; padding: 5px 18px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .input-row { padding: 15px 0; border-bottom: 1px solid #F2F2F7; display: flex; align-items: center; position: relative; }
+        .input-row:last-child { border-bottom: none; }
+        .input-row label { width: 90px; font-size: 14px; font-weight: 700; color: #444; }
+        .input-row input { flex: 1; border: none; outline: none; font-size: 16px; font-weight: 600; color: var(--primary); text-align: right; }
 
-        .container {
-            padding: 10px 0 160px;
-            max-width: 500px;
-            margin: 0 auto;
-        }
+        /* Asset Grid */
+        .asset-list { margin-top: 15px; }
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #F8F8F8; }
+        .asset-name { font-size: 14px; font-weight: 600; color: #333; }
+        .asset-check { font-size: 13px; font-weight: 800; }
 
-        .hidden {
-            display: none !important;
-        }
-
-        .sticky-box {
-            position: sticky;
-            top: 110px;
-            background: var(--ios-bg);
-            padding: 12px 16px;
-            z-index: 900;
-        }
-
-        .search-container {
-            background: #E3E3E8;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
-            position: relative;
-        }
-
-        .search-container i {
-            color: var(--ios-secondary);
-            margin-right: 10px;
-            font-style: normal;
-            font-size: 18px;
-        }
-
-        .search-container input {
-            background: transparent;
-            border: none;
-            width: 100%;
-            font-size: 17px;
-            outline: none;
-            font-weight: 500;
-        }
-
-        .filter-row {
-            display: flex;
-            overflow-x: auto;
-            padding: 5px 16px 15px;
-            gap: 10px;
-        }
-
-        .filter-row::-webkit-scrollbar {
-            display: none;
-        }
-
-        .pill {
-            white-space: nowrap;
-            padding: 9px 18px;
-            background: #D1D1D6;
-            border-radius: 100px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #3A3A3C;
+        /* Camera Box */
+        .camera-btn { 
+            background: linear-gradient(135deg, #007AFF, #5856D6); 
+            border-radius: 20px; 
+            padding: 25px; 
+            text-align: center; 
+            color: white; 
+            font-weight: 800; 
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(88,86,214,0.3);
             cursor: pointer;
         }
+        .preview-img { width: 100%; border-radius: 15px; margin-top: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
-        .pill.active {
-            background: var(--ios-blue);
-            color: white;
+        /* Navigation Bar */
+        nav { 
+            position: fixed; bottom: 20px; left: 20px; right: 20px; 
+            background: rgba(255,255,255,0.9); 
+            backdrop-filter: blur(25px); 
+            border-radius: 24px; 
+            display: flex; 
+            padding: 10px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            border: 1px solid rgba(255,255,255,0.5);
+            z-index: 2000;
         }
+        .nav-tab { flex: 1; text-align: center; color: #A1A1AA; transition: 0.3s; padding: 8px 0; }
+        .nav-tab.active { color: var(--primary); transform: translateY(-3px); }
+        .nav-tab i { font-size: 22px; display: block; margin-bottom: 4px; font-style: normal; }
+        .nav-tab span { font-size: 10px; font-weight: 800; }
 
-        .card {
-            background: white;
-            border-radius: 16px;
-            margin: 0 16px 15px;
-            position: relative;
-            overflow: visible !important;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
-        }
+        /* Suggestion Box */
+        .suggest { position: absolute; left: 0; right: 0; top: 100%; background: white; z-index: 5000; border-radius: 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); border: 1px solid var(--border); max-height: 200px; overflow-y: auto; }
+        .suggest-item { padding: 14px 18px; border-bottom: 1px solid #F5F5F7; font-size: 15px; font-weight: 600; }
 
-        .list-item {
-            padding: 18px;
-            border-bottom: 0.5px solid #F2F2F7;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        /* Overlay Loader */
+        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #F3F3F3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .item-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #000;
-        }
-
-        .item-sub {
-            font-size: 14px;
-            color: var(--ios-secondary);
-            margin-top: 4px;
-            font-weight: 500;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .st-vandoanh {
-            background: rgba(52, 199, 89, 0.12);
-            color: #248A3D;
-        }
-
-        .st-xenam {
-            background: rgba(255, 59, 48, 0.12);
-            color: #D7261D;
-        }
-
-        .st-other {
-            background: rgba(0, 122, 255, 0.1);
-            color: var(--ios-blue);
-        }
-
-        .suggest-box {
-            position: absolute;
-            left: 0;
-            right: 0;
-            background: white;
-            z-index: 9999;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
-            border-radius: 14px;
-            border: 0.5px solid var(--ios-border);
-            max-height: 220px;
-            overflow-y: auto;
-            margin-top: 6px;
-        }
-
-        .suggest-item {
-            padding: 16px 18px;
-            border-bottom: 0.5px solid #F2F2F7;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--ios-text);
-        }
-
-        .section-title {
-            padding: 15px 20px 8px;
-            font-size: 13px;
-            color: var(--ios-secondary);
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 0.8px;
-        }
-
-        .form-group {
-            background: white;
-            border-radius: 16px;
-            margin: 0 16px 15px;
-            overflow: visible !important;
-        }
-
-        .form-row {
-            padding: 16px 18px;
-            border-bottom: 0.5px solid #F2F2F7;
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
-
-        .form-row label {
-            width: 110px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #3A3A3C;
-        }
-
-        .form-row input {
-            border: none;
-            outline: none;
-            flex: 1;
-            font-size: 17px;
-            background: transparent;
-            font-weight: 500;
-        }
-
-        .photo-box {
-            background: white;
-            border-radius: 16px;
-            margin: 0 16px 20px;
-            padding: 30px;
-            text-align: center;
-            border: 2.5px dashed var(--ios-blue);
-            color: var(--ios-blue);
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .photo-box img {
-            width: 100%;
-            border-radius: 14px;
-            margin-top: 15px;
-        }
-
-        .btn-ios {
-            background: var(--ios-blue);
-            color: white;
-            border: none;
-            padding: 20px;
-            border-radius: 18px;
-            width: calc(100% - 32px);
-            margin: 0 16px 40px;
-            font-size: 17px;
-            font-weight: 800;
-            box-shadow: 0 10px 25px rgba(0, 122, 255, 0.25);
-            cursor: pointer;
-        }
-
-        nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(25px);
-            border-top: 0.5px solid var(--ios-border);
-            display: flex;
-            padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
-            z-index: 1000;
-        }
-
-        .nav-item {
-            flex: 1;
-            text-align: center;
-            color: var(--ios-secondary);
-            font-size: 10px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .nav-item.active {
-            color: var(--ios-blue);
-        }
-
-        .nav-item i {
-            font-size: 26px;
-            display: block;
-            margin-bottom: 4px;
-            font-style: normal;
-        }
-
-        #overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(15px);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-
-        .loader {
-            width: 45px;
-            height: 45px;
-            border: 5px solid #E5E5EA;
-            border-top: 5px solid var(--ios-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
+        .btn-submit { background: var(--primary); color: white; border: none; width: 100%; padding: 18px; border-radius: 18px; font-size: 16px; font-weight: 800; box-shadow: 0 8px 20px rgba(0,122,255,0.2); cursor: pointer; }
     </style>
 </head>
-
 <body>
 
-    <div id="overlay" class="hidden">
-        <div class="loader"></div>
-        <p style="margin-top:20px; font-weight:800; color:var(--ios-blue);">Vui lòng đợi giây lát...</p>
-    </div>
+    <div id="loader" class="hidden"><div class="spinner"></div><p style="margin-top:15px; font-weight:700;">Đang xử lý...</p></div>
 
     <header>
-        <h1 id="view-title">Tra cứu</h1>
-        <button class="btn-sync" onclick="syncData()">🔄 Cập nhật</button>
+        <h1 id="header-title">Xanh Pro ERP</h1>
+        <div class="sync-icon" onclick="syncData()">🔄</div>
     </header>
 
     <div class="container">
-        <!-- TRA CỨU -->
-        <div id="view-search">
-            <div class="sticky-box">
-                <div class="search-container"><i>🔍</i><input type="text" id="q-search"
-                        placeholder="Biển số hoặc Số khung..." oninput="suggestSmart(this, 'suggest-search', 'plate')">
-                    <div id="suggest-search" class="suggest-box hidden"></div>
-                </div>
-            </div>
-            <div class="filter-row" id="status-filters"></div>
+        <!-- VIEW: TRA CỨU -->
+        <div id="v-search">
+            <div class="search-box">🔍<input type="text" id="q-search" placeholder="Số xe hoặc số khung..." oninput="applyFilter()"></div>
+            <div class="pills" id="status-pills"></div>
             <div id="list-search"></div>
         </div>
 
-        <!-- KIỂM KÊ -->
-        <div id="view-assets" class="hidden">
-            <div class="section-title">Nhập biển số để xem vật tư</div>
-            <div class="sticky-box" style="top:150px;">
-                <div class="search-container">
-                    <i>🔍</i>
-                    <input type="text" id="q-assets" placeholder="Gõ biển số xe..."
-                        oninput="suggestSmart(this, 'suggest-q-assets', 'plate')">
-                    <div id="suggest-q-assets" class="suggest-box hidden"></div>
-                </div>
-            </div>
-            <div id="display-assets" class="hidden">
-                <div class="card" style="padding: 25px; margin: 20px 16px; border: 2px solid var(--ios-blue);">
-                    <h2 id="plate-title"
-                        style="color:var(--ios-blue); margin-bottom:20px; font-size:32px; font-weight:900; letter-spacing:-1px;">
-                    </h2>
-                    <div id="items-assets"></div>
+        <!-- VIEW: KIỂM KÊ -->
+        <div id="v-assets" class="hidden">
+            <div class="search-box" style="position:relative;">📦<input type="text" id="in-assets" placeholder="Nhập biển số để xem vật tư..." oninput="suggest(this, 's-assets', 'plate')"><div id="s-assets" class="suggest hidden"></div></div>
+            <div id="res-assets" class="hidden">
+                <div class="card" style="border: 2px solid var(--primary); background: #F4F9FF;">
+                    <div style="font-size:24px; font-weight:900; color:var(--primary); margin-bottom:10px;" id="asset-plate"></div>
+                    <div id="asset-items"></div>
                 </div>
             </div>
         </div>
 
-        <!-- BÀN GIAO -->
-        <div id="view-handover" class="hidden">
-            <div class="section-title">Thông tin phương tiện</div>
-            <div class="form-group">
-                <div class="form-row"><label>Biển số</label><input type="text" id="h-plate"
-                        placeholder="Nhập biển số..." oninput="suggestSmart(this, 'suggest-h-plate', 'plate')">
-                    <div id="suggest-h-plate" class="suggest-box hidden"></div>
-                </div>
-                <div class="form-row"><label>Số ODO</label><input type="number" id="h-odo" placeholder="Số KM hiện tại">
-                </div>
+        <!-- VIEW: BÀN GIAO -->
+        <div id="v-handover" class="hidden">
+            <div class="form-section">
+                <div class="input-row" style="position:relative;"><label>Biển số</label><input type="text" id="h-plate" placeholder="Chọn xe..." oninput="suggest(this, 's-h-plate', 'plate')"><div id="s-h-plate" class="suggest hidden"></div></div>
+                <div class="input-row"><label>Số ODO</label><input type="number" id="h-odo" placeholder="0"></div>
             </div>
-            <div class="section-title">Nhân sự bàn giao</div>
-            <div class="form-group">
-                <div class="form-row"><label>Người giao</label><input type="text" id="h-sender"
-                        placeholder="Họ tên hoặc MSNV..." oninput="suggestSmart(this, 'suggest-h-sender', 'driver')">
-                    <div id="suggest-h-sender" class="suggest-box hidden"></div>
-                </div>
-                <div class="form-row"><label>Người nhận</label><input type="text" id="h-receiver"
-                        placeholder="Họ tên hoặc MSNV..." oninput="suggestSmart(this, 'suggest-h-receiver', 'driver')">
-                    <div id="suggest-h-receiver" class="suggest-box hidden"></div>
-                </div>
+            <div class="form-section">
+                <div class="input-row" style="position:relative;"><label>Người giao</label><input type="text" id="h-sender" placeholder="Họ tên..." oninput="suggest(this, 's-h-sender', 'driver')"><div id="s-h-sender" class="suggest hidden"></div></div>
+                <div class="input-row" style="position:relative;"><label>Người nhận</label><input type="text" id="h-receiver" placeholder="Họ tên..." oninput="suggest(this, 's-h-receiver', 'driver')"><div id="s-h-receiver" class="suggest hidden"></div></div>
             </div>
-            <div class="form-group">
-                <div class="form-row"><label>Ghi chú</label><input type="text" id="h-notes"
-                        placeholder="Tình trạng xe..."></div>
-            </div>
-            <div class="photo-box" onclick="document.getElementById('h-cam').click()">📸 CHỤP ẢNH BIÊN BẢN<img
-                    id="h-prev" class="hidden"><input type="file" id="h-cam" accept="image/*" capture="environment"
-                    class="hidden" onchange="previewImg(this)"></div>
-            <button class="btn-ios" onclick="processHandover()">XÁC NHẬN GỬI SHEET</button>
+            <div class="form-section"><div class="input-row"><label>Ghi chú</label><input type="text" id="h-notes" placeholder="Tình trạng xe..."></div></div>
+            <div class="camera-btn" onclick="document.getElementById('cam-file').click()">📸 CHỤP ẢNH BIÊN BẢN<img id="cam-prev" class="hidden preview-img"><input type="file" id="cam-file" accept="image/*" capture="environment" class="hidden" onchange="showPrev(this)"></div>
+            <button class="btn-submit" onclick="submitForm()">XÁC NHẬN GỬI DỮ LIỆU</button>
         </div>
 
-        <div id="view-off" class="hidden">
-            <div class="form-group" style="margin-top:20px;">
-                <div class="form-row"><label>Ngày OFF</label><input type="date" id="off-date-picker"
-                        onchange="applyOffFilter()"></div>
-            </div>
-            <div class="filter-row" id="group-filters"></div>
+        <!-- VIEW: LỊCH OFF -->
+        <div id="v-off" class="hidden">
+            <div class="search-box">📅<input type="date" id="off-date" onchange="applyOff()"></div>
+            <div class="pills" id="group-pills"></div>
             <div id="list-off"></div>
         </div>
 
-        <div id="view-history" class="hidden">
-            <div id="list-history"></div>
-        </div>
+        <!-- VIEW: LỊCH SỬ -->
+        <div id="v-history" class="hidden"><div id="list-history"></div></div>
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="switchView('search')"><i>🔍</i> Tra cứu</div>
-        <div class="nav-item" onclick="switchView('assets')"><i>📦</i> Kiểm kê</div>
-        <div class="nav-item" onclick="switchView('handover')"><i>📝</i> Bàn giao</div>
-        <div class="nav-item" onclick="switchView('off')"><i>📅</i> Lịch OFF</div>
-        <div class="nav-item" onclick="switchView('history')"><i>📜</i> Lịch sử</div>
+        <div class="nav-tab active" onclick="switchV('search')"><i>🔍</i><span>TRA CỨU</span></div>
+        <div class="nav-tab" onclick="switchV('assets')"><i>📦</i><span>KIỂM KÊ</span></div>
+        <div class="nav-tab" onclick="switchV('handover')"><i>📝</i><span>GIAO XE</span></div>
+        <div class="nav-tab" onclick="switchV('off')"><i>📅</i><span>LỊCH OFF</span></div>
+        <div class="nav-tab" onclick="switchV('history')"><i>📜</i><span>LỊCH SỬ</span></div>
     </nav>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycby8GpK2WUhVCGAjfST9A0tiJUo-NsiP6e_nAdsk_7l5eAIR4bc6TCj1lbOFAEkFQR4b/exec";
+        const GAS = "https://script.google.com/macros/s/AKfycby8GpK2WUhVCGAjfST9A0tiJUo-NsiP6e_nAdsk_7l5eAIR4bc6TCj1lbOFAEkFQR4b/exec";
         let db = { vehicles: [], drivers: [], assets: [], offSchedule: [], handoverLogs: [] };
-        let activeStatus = "Tất cả", activeGroup = "Tất cả tổ";
+        let curS = "Tất cả", curG = "Tất cả tổ";
 
-        function clean(s) { if (!s) return ""; return String(s).replace(/\(.*?\)/g, '').replace(/\d{10,}/g, '').trim(); }
-        function norm(s) { return String(s || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); }
+        function norm(s) { return String(s||'').replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); }
+        function clean(s) { return String(s||'').replace(/\(.*?\)/g, '').replace(/\d{10,}/g, '').trim(); }
 
-        async function openDB() { return new Promise(res => { const r = indexedDB.open('XanhProERP_V12_ULTRA', 1); r.onupgradeneeded = () => r.result.createObjectStore('data'); r.onsuccess = () => res(r.result); }); }
-        async function saveDB(d) { const idb = await openDB(); idb.transaction('data', 'readwrite').objectStore('data').put(d, 'db'); }
-        async function loadDB() { const idb = await openDB(); return new Promise(res => { const r = idb.transaction('data').objectStore('data').get('db'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }); }
+        async function openDB() { return new Promise(res => { const r = indexedDB.open('XanhERP_Mini', 1); r.onupgradeneeded = () => r.result.createObjectStore('data'); r.onsuccess = () => res(r.result); }); }
+        async function save(d) { const i = await openDB(); i.transaction('data','readwrite').objectStore('data').put(d, 'db'); }
+        async function load() { const i = await openDB(); return new Promise(res => { const r = i.transaction('data').objectStore('data').get('db'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }); }
 
-        function switchView(id) {
+        function switchV(id) {
             document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
-            document.getElementById(`view-${id}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', ['search', 'assets', 'handover', 'off', 'history'][i] === id));
-            document.getElementById('view-title').innerText = { search: 'Tra cứu', assets: 'Kiểm kê', handover: 'Bàn giao', off: 'Lịch OFF', history: 'Lịch sử' }[id];
+            document.getElementById(`v-${id}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-tab').forEach((t, i) => t.classList.toggle('active', ['search','assets','handover','off','history'][i] === id));
+            document.getElementById('header-title').innerText = {search:'ERP • Tra cứu', assets:'ERP • Kiểm kê', handover:'ERP • Bàn giao', off:'ERP • Lịch OFF', history:'ERP • Lịch sử'}[id];
         }
 
         async function syncData() {
-            document.getElementById('overlay').classList.remove('hidden');
+            document.getElementById('loader').classList.remove('hidden');
             try {
-                const res = await fetch(`${GAS_URL}?action=sync`, { redirect: 'follow' });
-                db = await res.json(); await saveDB(db); renderAll();
-            } catch (e) { alert("Lỗi kết nối dữ liệu!"); }
-            finally { document.getElementById('overlay').classList.add('hidden'); }
+                const res = await fetch(`${GAS}?action=sync`, { redirect: 'follow' });
+                db = await res.json(); await save(db); render();
+            } catch(e) { alert("Lỗi kết nối!"); }
+            finally { document.getElementById('loader').classList.add('hidden'); }
         }
 
-        function renderAll() {
-            if (!db || !db.vehicles) return;
-            const statuses = ["Tất cả", ...new Set(db.vehicles.map(v => v['Trạng thái cấp 2'] || 'N/A'))];
-            document.getElementById('status-filters').innerHTML = statuses.map(s => `<div class="pill ${activeStatus === s ? 'active' : ''}" onclick="filterByStatus('${s}')">${s}</div>`).join('');
-            const groups = ["Tất cả tổ", ...new Set(db.offSchedule.map(o => o['Bạn ở tổ nào'] || 'N/A'))];
-            document.getElementById('group-filters').innerHTML = groups.map(g => `<div class="pill ${activeGroup === g ? 'active' : ''}" onclick="filterByGroup('${g}')">${g}</div>`).join('');
-            applyFilter(); applyOffFilter();
-            document.getElementById('list-history').innerHTML = (db.handoverLogs || []).slice(-15).map(l => `<div class="card"><div class="list-item"><div class="item-main"><div class="item-title">${l['Biển số xe']}</div><div class="item-sub">${clean(l['Người giao'])} → ${clean(l['Người nhận'])}</div>${l['Ảnh biên bản'] ? `<a href="${l['Ảnh biên bản']}" target="_blank" style="font-size:12px; color:var(--ios-blue); font-weight:800;">📂 Xem biên bản</a>` : ''}</div></div></div>`).reverse().join('');
+        function render() {
+            if(!db.vehicles) return;
+            const sts = ["Tất cả", ...new Set(db.vehicles.map(v => v['Trạng thái cấp 2'] || 'N/A'))];
+            document.getElementById('status-pills').innerHTML = sts.map(s => `<div class="pill ${curS===s?'active':''}" onclick="fSt('${s}')">${s}</div>`).join('');
+            const grps = ["Tất cả tổ", ...new Set(db.offSchedule.map(o => o['Bạn ở tổ nào'] || 'N/A'))];
+            document.getElementById('group-pills').innerHTML = grps.map(g => `<div class="pill ${curG===g?'active':''}" onclick="fGr('${g}')">${g}</div>`).join('');
+            applyFilter(); applyOff();
+            document.getElementById('list-history').innerHTML = (db.handoverLogs || []).slice(-15).reverse().map(l => `
+                <div class="card">
+                    <div class="card-header"><span class="plate-no">${l['Biển số xe']}</span><span class="sub-info">${l['Số KM (ODO)']} KM</span></div>
+                    <div class="sub-info">${clean(l['Người giao'])} → ${clean(l['Người nhận'])}</div>
+                    ${l['Link ảnh biên bản'] ? `<a href="${l['Link ảnh biên bản']}" target="_blank" style="font-size:11px; color:var(--primary); font-weight:800; margin-top:8px; display:block;">📂 XEM BIÊN BẢN</a>` : ''}
+                </div>
+            `).join('');
         }
 
-        function filterByStatus(s) { activeStatus = s; applyFilter(); renderAll(); }
-        function filterByGroup(g) { activeGroup = g; applyOffFilter(); renderAll(); }
+        function fSt(s) { curS = s; render(); }
+        function fGr(g) { curG = g; render(); }
 
         function applyFilter() {
             const q = norm(document.getElementById('q-search').value);
             let list = db.vehicles;
-            if (activeStatus !== "Tất cả") list = list.filter(v => (v['Trạng thái cấp 2'] || 'N/A') === activeStatus);
-            if (q) list = list.filter(v => norm(v['Biển số']).includes(q) || norm(v['Số khung']).includes(q));
+            if(curS !== "Tất cả") list = list.filter(v => (v['Trạng thái cấp 2'] || 'N/A') === curS);
+            if(q) list = list.filter(v => norm(v['Biển số']).includes(q) || norm(v['Số khung']).includes(q));
             document.getElementById('list-search').innerHTML = list.map(v => {
-                const st = v['Trạng thái cấp 2'] || 'N/A';
-                const cl = st.toLowerCase().includes('vận doanh') ? 'st-vandoanh' : (st.toLowerCase().includes('nằm') ? 'st-xenam' : 'st-other');
-                return `<div class="card"><div class="list-item"><div class="item-main"><div class="item-title">${v['Biển số'] || 'N/A'}</div><div class="item-sub">Khung: ${v['Số khung'] || 'N/A'}</div></div><div class="status-badge ${cl}">${st}</div></div></div>`;
+                const s = v['Trạng thái cấp 2'] || 'N/A';
+                const c = s.includes('vận doanh') ? 'tag-green' : (s.includes('nằm') ? 'tag-red' : 'tag-blue');
+                return `<div class="card"><div class="card-header"><span class="plate-no">${v['Biển số']}</span><span class="tag ${c}">${s}</span></div><div class="sub-info">Khung: ${v['Số khung']}</div></div>`;
             }).join('');
         }
 
-        function applyOffFilter() {
-            const date = document.getElementById('off-date-picker').value;
-            let data = db.offSchedule || [];
-            if (date) { const sDate = new Date(date).toLocaleDateString('en-CA'); data = data.filter(o => new Date(o['Ngày OFF']).toLocaleDateString('en-CA') === sDate); }
-            if (activeGroup !== "Tất cả tổ") data = data.filter(o => o['Bạn ở tổ nào'] === activeGroup);
-            document.getElementById('list-off').innerHTML = data.map(o => `<div class="card"><div class="list-item"><div class="item-main"><div class="item-title">${clean(o['Họ Và Tên'])}</div><div class="item-sub">${o['Lý Do']} • Tổ: ${o['Bạn ở tổ nào']}</div></div></div></div>`).join('');
+        function applyOff() {
+            const d = document.getElementById('off-date').value;
+            let list = db.offSchedule || [];
+            if(d) { const sd = new Date(d).toLocaleDateString('en-CA'); list = list.filter(o => new Date(o['Ngày OFF']).toLocaleDateString('en-CA') === sd); }
+            if(curG !== "Tất cả tổ") list = list.filter(o => o['Bạn ở tổ nào'] === curG);
+            document.getElementById('list-off').innerHTML = list.map(o => `<div class="card"><div class="plate-no">${clean(o['Họ Và Tên'])}</div><div class="sub-info">${o['Lý Do']} • Tổ: ${o['Bạn ở tổ nào']}</div></div>`).join('');
         }
 
-        function suggestSmart(input, bid, type) {
-            const q = norm(input.value); const box = document.getElementById(bid);
-            if (!q) { box.classList.add('hidden'); return; }
-            const rect = input.getBoundingClientRect();
-            if (rect.bottom + 200 > window.innerHeight) { box.style.bottom = '100%'; box.style.top = 'auto'; }
-            else { box.style.top = '100%'; box.style.bottom = 'auto'; }
-            let m = [];
-            if (type === 'plate') m = db.vehicles.filter(v => norm(v['Biển số']).includes(q)).slice(0, 5);
-            else m = db.drivers.filter(d => norm(clean(d['Họ & tên'])).includes(q) || norm(d['Mã tài xế']).includes(q)).slice(0, 5);
+        function suggest(el, bid, type) {
+            const q = norm(el.value); const box = document.getElementById(bid);
+            if(!q) { box.classList.add('hidden'); return; }
+            let m = (type==='plate') ? db.vehicles.filter(v => norm(v['Biển số']).includes(q)).slice(0,5) : db.drivers.filter(d => norm(clean(d['Họ & tên'])).includes(q) || norm(d['Mã tài xế']).includes(q)).slice(0,5);
             box.innerHTML = m.map(i => {
-                const val = type === 'plate' ? i['Biển số'] : `${clean(i['Họ & tên'])} ${clean(i['Mã tài xế'])}`;
-                return `<div class="suggest-item" onmousedown="selectItem('${val}', '${bid}', '${type}')">${val}</div>`;
+                const v = type==='plate' ? i['Biển số'] : `${clean(i['Họ & tên'])} ${clean(i['Mã tài xế'])}`;
+                return `<div class="suggest-item" onmousedown="sel('${v}', '${bid}', '${type}')">${v}</div>`;
             }).join('');
             box.classList.remove('hidden');
         }
 
-        function selectItem(val, bid, type) {
-            const id = bid.replace('suggest-', '');
-            const inputEl = document.getElementById(id);
-            if (inputEl) inputEl.value = val;
-            document.querySelectorAll('.suggest-box').forEach(b => b.classList.add('hidden'));
-            if (type === 'plate' && (id === 'q-assets' || id === 'h-plate')) {
-                const data = db.assets.find(a => norm(a['Biển số xe']) === norm(val));
+        function sel(v, bid, type) {
+            const id = bid.replace('s-', '');
+            document.getElementById(id).value = v;
+            document.querySelectorAll('.suggest').forEach(b => b.classList.add('hidden'));
+            if(type === 'plate' && id === 'in-assets') {
+                const d = db.assets.find(a => norm(a['Biển số xe']) === norm(v));
                 const its = ["Máy Pos", "Sim", "Thảm cabin", "Thảm sau cốp", "Xe Đẩy Hàng", "Dây Ràng", "Bao tay", "Thẻ định vị"];
-                const plateTitle = document.getElementById('plate-title');
-                const itemsAssets = document.getElementById('items-assets');
-                if (plateTitle) plateTitle.innerText = val;
-                if (itemsAssets) {
-                    itemsAssets.innerHTML = its.map(it => {
-                        const has = data && data[it] == "1";
-                        return `<div class="list-item" style="padding:15px 0; border-bottom:1px solid #eee;"><span style="font-weight:600;">${it}</span><span style="font-weight:800; color:${has ? 'var(--ios-green)' : 'var(--ios-red)'}">${has ? '✓ CÓ' : '✕ THIẾU'}</span></div>`;
-                    }).join('');
-                }
-                const displayEl = document.getElementById('display-assets');
-                if (displayEl) displayEl.classList.remove('hidden');
+                document.getElementById('asset-plate').innerText = v;
+                document.getElementById('asset-items').innerHTML = its.map(it => {
+                    const has = d && d[it] == "1";
+                    return `<div class="asset-item"><span class="asset-name">${it}</span><span class="asset-check" style="color:${has?'var(--success)':'var(--danger)'}">${has?'✓ CÓ':'✕ THIẾU'}</span></div>`;
+                }).join('');
+                document.getElementById('res-assets').classList.remove('hidden');
             }
         }
 
-        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = e => { document.getElementById('h-prev').src = e.target.result; document.getElementById('h-prev').classList.remove('hidden'); }; r.readAsDataURL(i.files[0]); } }
+        function showPrev(i) { if(i.files && i.files[0]) { const r = new FileReader(); r.onload = e => { document.getElementById('cam-prev').src = e.target.result; document.getElementById('cam-prev').classList.remove('hidden'); }; r.readAsDataURL(i.files[0]); } }
 
-        async function processHandover() {
+        async function submitForm() {
             const p = document.getElementById('h-plate').value, o = document.getElementById('h-odo').value, s = document.getElementById('h-sender').value, r = document.getElementById('h-receiver').value, n = document.getElementById('h-notes').value;
-            if (!p || !o) return alert("Thiếu Biển số/ODO!");
-            document.getElementById('overlay').classList.remove('hidden');
-            const payload = { licensePlate: p, mileage: o, sender: s || "N/A", receiver: r || "N/A", notes: n, actualDate: new Date().toLocaleDateString('vi-VN'), image: document.getElementById('h-prev').src.startsWith('data') ? document.getElementById('h-prev').src : null };
-            try { const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }); const result = await res.json(); if (result.success) { alert("Bàn giao thành công!"); syncData(); switchView('history'); } } catch (e) { alert("Lỗi!"); } finally { document.getElementById('overlay').classList.add('hidden'); }
+            if(!p || !o) return alert("Vui lòng điền Biển số & ODO!");
+            document.getElementById('loader').classList.remove('hidden');
+            const payload = { licensePlate: p, mileage: o, sender: s||"N/A", receiver: r||"N/A", notes: n, actualDate: new Date().toLocaleDateString('vi-VN'), image: document.getElementById('cam-prev').src.startsWith('data') ? document.getElementById('cam-prev').src : null };
+            try {
+                const res = await fetch(GAS, { method: 'POST', body: JSON.stringify(payload) });
+                const resJ = await res.json();
+                if(resJ.success) { alert("Bàn giao thành công! Ảnh đang được lưu..."); syncData(); switchV('history'); }
+            } catch(e) { alert("Lỗi gửi dữ liệu!"); }
+            finally { document.getElementById('loader').classList.remove('hidden'); }
         }
 
-        window.onclick = (e) => { if (!e.target.closest('.search-container') && !e.target.closest('.form-row')) document.querySelectorAll('.suggest-box').forEach(b => b.classList.add('hidden')); };
-        window.onload = async () => { const cached = await loadDB(); if (cached) { db = cached; renderAll(); } else { syncData(); } };
+        window.onclick = (e) => { if(!e.target.closest('.search-box') && !e.target.closest('.input-row')) document.querySelectorAll('.suggest').forEach(b => b.classList.add('hidden')); };
+        window.onload = async () => { const c = await load(); if(c) { db = c; render(); } else { syncData(); } };
     </script>
 </body>
-
 </html>
