@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Xanh SM Pro ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ios-blue: #007AFF;
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-text: #1C1C1E;
+            --ios-secondary: #8E8E93;
+            --ios-border: #D1D1D6;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--ios-bg); color: var(--ios-text); overflow-x: hidden; }
+
+        header { padding: 50px 20px 15px; background: rgba(242, 242, 247, 0.8); backdrop-filter: saturate(180%) blur(25px); position: sticky; top: 0; z-index: 1000; border-bottom: 0.5px solid var(--ios-border); display: flex; justify-content: space-between; align-items: flex-end; }
+        header h1 { font-size: 34px; font-weight: 800; letter-spacing: -1.2px; color: #000; }
+        .btn-sync { background: white; color: var(--ios-blue); border: none; padding: 10px 16px; border-radius: 22px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: 0.2s; }
+        .btn-sync:active { transform: scale(0.92); opacity: 0.8; }
+
+        .container { padding: 10px 0 160px; max-width: 500px; margin: 0 auto; }
+        .hidden { display: none !important; }
+
+        /* Modern Search Bar */
+        .sticky-box { position: sticky; top: 110px; background: var(--ios-bg); padding: 12px 16px; z-index: 900; }
+        .search-container { background: #E3E3E8; border-radius: 14px; display: flex; align-items: center; padding: 12px 15px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+        .search-container i { color: var(--ios-secondary); margin-right: 10px; font-style: normal; font-size: 18px; }
+        .search-container input { background: transparent; border: none; width: 100%; font-size: 17px; outline: none; font-weight: 500; }
+
+        .filter-row { display: flex; overflow-x: auto; padding: 5px 16px 15px; gap: 10px; }
+        .filter-row::-webkit-scrollbar { display: none; }
+        .pill { white-space: nowrap; padding: 9px 18px; background: #D1D1D6; border-radius: 100px; font-size: 13px; font-weight: 700; color: #3A3A3C; cursor: pointer; }
+        .pill.active { background: var(--ios-blue); color: white; }
+
+        /* Cards & Lists */
+        .card { background: white; border-radius: 16px; margin: 0 16px 15px; position: relative; overflow: visible !important; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
+        .list-item { padding: 18px; border-bottom: 0.5px solid #F2F2F7; display: flex; justify-content: space-between; align-items: center; }
+        .item-title { font-size: 18px; font-weight: 700; color: #000; }
+        .item-sub { font-size: 14px; color: var(--ios-secondary); margin-top: 4px; font-weight: 500; }
+
+        .status-badge { padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .st-vandoanh { background: rgba(52, 199, 89, 0.12); color: #248A3D; }
+        .st-xenam { background: rgba(255, 59, 48, 0.12); color: #D7261D; }
+        .st-other { background: rgba(0, 122, 255, 0.1); color: var(--ios-blue); }
+
+        /* Floating Suggestions - PREMIUM DESIGN */
+        .suggest-box { position: absolute; left: 0; right: 0; background: white; z-index: 9999; box-shadow: 0 20px 50px rgba(0,0,0,0.18); border-radius: 14px; border: 0.5px solid var(--ios-border); max-height: 220px; overflow-y: auto; margin-top: 6px; }
+        .suggest-item { padding: 16px 18px; border-bottom: 0.5px solid #F2F2F7; font-size: 16px; font-weight: 600; color: var(--ios-text); }
+        .suggest-item:active { background: #F2F2F7; }
+
+        /* Form Controls */
+        .section-title { padding: 15px 20px 8px; font-size: 13px; color: var(--ios-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 0.8px; }
+        .form-group { background: white; border-radius: 16px; margin: 0 16px 15px; overflow: visible !important; }
+        .form-row { padding: 16px 18px; border-bottom: 0.5px solid #F2F2F7; display: flex; align-items: center; position: relative; }
+        .form-row:last-child { border-bottom: none; }
+        .form-row label { width: 110px; font-size: 15px; font-weight: 600; color: #3A3A3C; }
+        .form-row input { border: none; outline: none; flex: 1; font-size: 17px; background: transparent; font-weight: 500; }
+
+        .photo-box { background: white; border-radius: 16px; margin: 0 16px 20px; padding: 30px; text-align: center; border: 2.5px dashed var(--ios-blue); color: var(--ios-blue); font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .photo-box:active { background: rgba(0,122,255,0.05); }
+        .photo-box img { width: 100%; border-radius: 14px; margin-top: 15px; }
+
+        .btn-ios { background: var(--ios-blue); color: white; border: none; padding: 20px; border-radius: 18px; width: calc(100% - 32px); margin: 0 16px 40px; font-size: 17px; font-weight: 800; box-shadow: 0 10px 25px rgba(0,122,255,0.25); cursor: pointer; }
+        .btn-ios:active { transform: scale(0.97); }
+
+        /* Nav */
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(25px); border-top: 0.5px solid var(--ios-border); display: flex; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); z-index: 1000; }
+        .nav-item { flex: 1; text-align: center; color: var(--ios-secondary); font-size: 10px; font-weight: 700; cursor: pointer; }
+        .nav-item.active { color: var(--ios-blue); }
+        .nav-item i { font-size: 26px; display: block; margin-bottom: 4px; font-style: normal; }
+
+        #overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .loader { width: 45px; height: 45px; border: 5px solid #E5E5EA; border-top: 5px solid var(--ios-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="overlay" class="hidden"><div class="loader"></div><p style="margin-top:20px; font-weight:800; color:var(--ios-blue);">Vui lòng đợi giây lát...</p></div>
+
+    <header>
+        <h1 id="view-title">Tra cứu</h1>
+        <button class="btn-sync" onclick="syncData()">🔄 Cập nhật</button>
+    </header>
+
+    <div class="container">
+        
+        <!-- TRA CỨU -->
+        <div id="view-search">
+            <div class="sticky-box"><div class="search-container"><i>🔍</i><input type="text" id="q-search" placeholder="Biển số hoặc Số khung..." oninput="applyFilter()"></div></div>
+            <div class="filter-row" id="status-filters"></div>
+            <div id="list-search"></div>
+        </div>
+
+        <!-- KIỂM KÊ -->
+        <div id="view-assets" class="hidden">
+            <div class="section-title">Nhập biển số để xem vật tư</div>
+            <div class="sticky-box" style="top:150px;">
+                <div class="search-container">
+                    <i>🔍</i>
+                    <input type="text" id="q-assets" placeholder="Gõ 5 số cuối biển số..." oninput="suggestSmart(this, 'suggest-assets', 'plate')">
+                    <div id="suggest-assets" class="suggest-box hidden"></div>
+                </div>
+            </div>
+            <div id="display-assets" class="hidden">
+                <div class="card" style="padding: 25px; margin: 20px 16px; border: 1.5px solid var(--ios-blue);">
+                    <h2 id="plate-title" style="color:var(--ios-blue); margin-bottom:20px; font-size:30px; font-weight:900; letter-spacing:-1px;"></h2>
+                    <div id="items-assets"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BÀN GIAO -->
+        <div id="view-handover" class="hidden">
+            <div class="section-title">Thông tin phương tiện</div>
+            <div class="form-group">
+                <div class="form-row"><label>Biển số</label><input type="text" id="h-plate" placeholder="Nhập biển số..." oninput="suggestSmart(this, 'suggest-h-plate', 'plate')"><div id="suggest-h-plate" class="suggest-box hidden"></div></div>
+                <div class="form-row"><label>Số ODO</label><input type="number" id="h-odo" placeholder="Số KM hiện tại"></div>
+            </div>
+            <div class="section-title">Nhân sự bàn giao</div>
+            <div class="form-group">
+                <div class="form-row"><label>Người giao</label><input type="text" id="h-sender" placeholder="Họ tên hoặc MSNV..." oninput="suggestSmart(this, 'suggest-h-sender', 'driver')"><div id="suggest-h-sender" class="suggest-box hidden"></div></div>
+                <div class="form-row"><label>Người nhận</label><input type="text" id="h-receiver" placeholder="Họ tên hoặc MSNV..." oninput="suggestSmart(this, 'suggest-h-receiver', 'driver')"><div id="suggest-h-receiver" class="suggest-box hidden"></div></div>
+            </div>
+            <div class="form-group"><div class="form-row"><label>Ghi chú</label><input type="text" id="h-notes" placeholder="Tình trạng xe..."></div></div>
+            <div class="photo-box" onclick="document.getElementById('h-cam').click()">📸 CHỤP ẢNH BIÊN BẢN<img id="h-prev" class="hidden"><input type="file" id="h-cam" accept="image/*" capture="environment" class="hidden" onchange="previewImg(this)"></div>
+            <button class="btn-ios" onclick="processHandover()">XÁC NHẬN GỬI SHEET</button>
+        </div>
+
+        <div id="view-off" class="hidden">
+            <div class="form-group" style="margin-top:20px;"><div class="form-row"><label>Ngày OFF</label><input type="date" id="off-date-picker" onchange="applyOffFilter()"></div></div>
+            <div class="filter-row" id="group-filters"></div>
+            <div id="list-off"></div>
+        </div>
+
+        <div id="view-history" class="hidden"><div id="list-history"></div></div>
+    </div>
+
+    <nav>
+        <div class="nav-item active" onclick="switchView('search')"><i>🔍</i> Tra cứu</div>
+        <div class="nav-item" onclick="switchView('assets')"><i>📦</i> Kiểm kê</div>
+        <div class="nav-item" onclick="switchView('handover')"><i>📝</i> Bàn giao</div>
+        <div class="nav-item" onclick="switchView('off')"><i>📅</i> Lịch OFF</div>
+        <div class="nav-item" onclick="switchView('history')"><i>📜</i> Lịch sử</div>
+    </nav>
+
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycby8GpK2WUhVCGAjfST9A0tiJUo-NsiP6e_nAdsk_7l5eAIR4bc6TCj1lbOFAEkFQR4b/exec";
+        let db = { vehicles: [], drivers: [], assets: [], offSchedule: [], handoverLogs: [] };
+        let activeStatus = "Tất cả", activeGroup = "Tất cả tổ";
+
+        function clean(s) { if(!s) return ""; return String(s).replace(/\(.*?\)/g, '').replace(/\d{10,}/g, '').trim(); }
+
+        async function openDB() { return new Promise(res => { const r = indexedDB.open('XanhProERP_V12_ULTRA', 1); r.onupgradeneeded = () => r.result.createObjectStore('data'); r.onsuccess = () => res(r.result); }); }
+        async function saveDB(d) { const idb = await openDB(); idb.transaction('data','readwrite').objectStore('data').put(d, 'db'); }
+        async function loadDB() { const idb = await openDB(); return new Promise(res => { const r = idb.transaction('data').objectStore('data').get('db'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }); }
+
+        function switchView(id) {
+            document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
+            document.getElementById(`view-${id}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', ['search','assets','handover','off','history'][i] === id));
+            document.getElementById('view-title').innerText = {search:'Tra cứu', assets:'Kiểm kê', handover:'Bàn giao', off:'Lịch OFF', history:'Lịch sử'}[id];
+        }
+
+        async function syncData() {
+            document.getElementById('overlay').classList.remove('hidden');
+            try {
+                const res = await fetch(`${GAS_URL}?action=sync`, { redirect: 'follow' });
+                db = await res.json(); await saveDB(db); renderAll();
+            } catch(e) { alert("Lỗi kết nối dữ liệu!"); }
+            finally { document.getElementById('overlay').classList.add('hidden'); }
+        }
+
+        function renderAll() {
+            if(!db || !db.vehicles) return;
+            const statuses = ["Tất cả", ...new Set(db.vehicles.map(v => v['Trạng thái cấp 2'] || 'N/A'))];
+            document.getElementById('status-filters').innerHTML = statuses.map(s => `<div class="pill ${activeStatus === s ? 'active' : ''}" onclick="filterByStatus('${s}')">${s}</div>`).join('');
+            const groups = ["Tất cả tổ", ...new Set(db.offSchedule.map(o => o['Bạn ở tổ nào'] || 'N/A'))];
+            document.getElementById('group-filters').innerHTML = groups.map(g => `<div class="pill ${activeGroup === g ? 'active' : ''}" onclick="filterByGroup('${g}')">${g}</div>`).join('');
+            applyFilter(); applyOffFilter();
+            document.getElementById('list-history').innerHTML = (db.handoverLogs || []).slice(-15).map(l => `<div class="card"><div class="list-item"><div class="item-main"><div class="item-title">${l['Biển số xe']}</div><div class="item-sub">${clean(l['Người giao'])} → ${clean(l['Người nhận'])}</div>${l['Ảnh biên bản'] ? `<a href="${l['Ảnh biên bản']}" target="_blank" style="font-size:12px; color:var(--ios-blue); font-weight:800;">📂 Xem biên bản</a>` : ''}</div></div></div>`).reverse().join('');
+        }
+
+        function filterByStatus(s) { activeStatus = s; applyFilter(); renderAll(); }
+        function filterByGroup(g) { activeGroup = g; applyOffFilter(); renderAll(); }
+
+        function applyFilter() {
+            const q = document.getElementById('q-search').value.toLowerCase();
+            let list = db.vehicles;
+            if(activeStatus !== "Tất cả") list = list.filter(v => (v['Trạng thái cấp 2'] || 'N/A') === activeStatus);
+            if(q) list = list.filter(v => (v['Biển số']||'').toLowerCase().includes(q) || (v['Số khung']||'').toLowerCase().includes(q));
+            document.getElementById('list-search').innerHTML = list.map(v => {
+                const st = v['Trạng thái cấp 2'] || 'N/A';
+                const cl = st.toLowerCase().includes('vận doanh') ? 'st-vandoanh' : (st.toLowerCase().includes('nằm') ? 'st-xenam' : 'st-other');
+                return `<div class="card"><div class="list-item"><div class="item-main"><div class="item-title">${v['Biển số'] || 'N/A'}</div><div class="item-sub">Khung: ${v['Số khung'] || 'N/A'}</div></div><div class="status-badge ${cl}">${st}</div></div></div>`;
+            }).join('');
+        }
+
+        function applyOffFilter() {
+            const date = document.getElementById('off-date-picker').value;
+            let data = db.offSchedule || [];
+            if(date) { const sDate = new Date(date).toLocaleDateString('en-CA'); data = data.filter(o => new Date(o['Ngày OFF']).toLocaleDateString('en-CA') === sDate); }
+            if(activeGroup !== "Tất cả tổ") data = data.filter(o => o['Bạn ở tổ nào'] === activeGroup);
+            document.getElementById('list-off').innerHTML = data.map(o => `<div class="card"><div class="list-item"><div class="item-main"><div class="item-title">${clean(o['Họ Và Tên'])}</div><div class="item-sub">${o['Lý Do']} • Tổ: ${o['Bạn ở tổ nào']}</div></div></div></div>`).join('');
+        }
+
+        function suggestSmart(input, bid, type) {
+            const q = input.value; const box = document.getElementById(bid);
+            if(!q) { box.classList.add('hidden'); return; }
+            const rect = input.getBoundingClientRect();
+            if (rect.bottom + 200 > window.innerHeight) { box.style.bottom = '100%'; box.style.top = 'auto'; }
+            else { box.style.top = '100%'; box.style.bottom = 'auto'; }
+            let m = [];
+            if(type==='plate') m = db.vehicles.filter(v => (v['Biển số']||'').toLowerCase().includes(q.toLowerCase())).slice(0,5);
+            else m = db.drivers.filter(d => clean(d['Họ & tên']).toLowerCase().includes(q.toLowerCase()) || String(d['Mã tài xế']).toLowerCase().includes(q.toLowerCase())).slice(0,5);
+            box.innerHTML = m.map(i => {
+                const val = type==='plate' ? i['Biển số'] : `${clean(i['Họ & tên'])} ${clean(i['Mã tài xế'])}`;
+                return `<div class="suggest-item" onmousedown="selectItem('${val}', '${bid}', '${type}')">${val}</div>`;
+            }).join('');
+            box.classList.remove('hidden');
+        }
+
+        function selectItem(val, bid, type) {
+            const id = bid.replace('suggest-', '');
+            document.getElementById(id).value = val;
+            document.querySelectorAll('.suggest-box').forEach(b => b.classList.add('hidden'));
+            if(type === 'plate' && id === 'q-assets') {
+                const data = db.assets.find(a => a['Biển số xe'] === val);
+                const its = ["Máy Pos", "Sim", "Thảm cabin", "Thảm sau cốp", "Xe Đẩy Hàng", "Dây Ràng", "Bao tay", "Thẻ định vị"];
+                document.getElementById('plate-title').innerText = val;
+                document.getElementById('items-assets').innerHTML = its.map(it => {
+                    const has = data && data[it] == "1";
+                    return `<div class="list-item" style="padding:15px 0; border-bottom:1px solid #eee;"><span style="font-weight:600;">${it}</span><span style="font-weight:800; color:${has?'var(--ios-green)':'var(--ios-red)'}">${has?'✓ CÓ':'✕ THIẾU'}</span></div>`;
+                }).join('');
+                document.getElementById('display-assets').classList.remove('hidden');
+            }
+        }
+
+        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = e => { document.getElementById('h-prev').src = e.target.result; document.getElementById('h-prev').classList.remove('hidden'); }; r.readAsDataURL(i.files[0]); } }
+
+        async function processHandover() {
+            const p = document.getElementById('h-plate').value, o = document.getElementById('h-odo').value, s = document.getElementById('h-sender').value, r = document.getElementById('h-receiver').value, n = document.getElementById('h-notes').value;
+            if(!p || !o) return alert("Thiếu Biển số/ODO!");
+            document.getElementById('overlay').classList.remove('hidden');
+            const payload = { licensePlate: p, mileage: o, sender: s || "N/A", receiver: r || "N/A", notes: n, actualDate: new Date().toLocaleDateString('vi-VN'), image: document.getElementById('h-prev').src.startsWith('data') ? document.getElementById('h-prev').src : null };
+            try { const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) }); const result = await res.json(); if(result.success) { alert("Bàn giao thành công!"); syncData(); switchView('history'); } } catch(e) { alert("Lỗi!"); } finally { document.getElementById('overlay').classList.add('hidden'); }
+        }
+
+        window.onclick = (e) => { if(!e.target.closest('.search-container') && !e.target.closest('.form-row')) document.querySelectorAll('.suggest-box').forEach(b => b.classList.add('hidden')); };
+        window.onload = async () => { const cached = await loadDB(); if(cached) { db = cached; renderAll(); } else { syncData(); } };
+    </script>
+</body>
+</html>
