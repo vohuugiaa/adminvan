@@ -71,6 +71,9 @@
         input:checked + .slider { background-color: var(--ios-green); }
         input:checked + .slider:before { transform: translateX(20px); }
 
+        .btn-edit { background: #E5E5EA; color: var(--ios-blue); border: none; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; transition: 0.2s; }
+        .btn-edit:active { background: #D1D1D6; transform: scale(0.95); }
+
         .photo-box { background: white; border-radius: 14px; margin: 0 12px 15px; padding: 25px; text-align: center; border: 1.5px dashed var(--ios-blue); color: var(--ios-blue); font-weight: 700; font-size: 14px; }
         .photo-box img { width: 100%; border-radius: 10px; margin-top: 12px; }
 
@@ -307,12 +310,14 @@
                     itemsAssets.innerHTML = its.map(it => {
                         const has = data && data[it] == "1";
                         return `
-                            <div class="list-item" style="padding:15px 0; border-bottom:0.5px solid var(--ios-border);">
-                                <span style="font-weight:600;">${it}</span>
-                                <label class="switch">
-                                    <input type="checkbox" ${has?'checked':''} onchange="toggleAsset('${val}', '${it}', this.checked)">
-                                    <span class="slider"></span>
-                                </label>
+                            <div class="list-item" style="padding:14px 0; border-bottom:0.5px solid var(--ios-border);">
+                                <div class="item-main">
+                                    <div style="font-weight:600; font-size:15px;">${it}</div>
+                                    <div id="status-text-${it}" style="font-size:12px; font-weight:800; color:${has?'var(--ios-green)':'var(--ios-red)'}; margin-top:2px;">
+                                        ${has ? '✓ ĐANG CÓ' : '✕ ĐANG THIẾU'}
+                                    </div>
+                                </div>
+                                <button class="btn-edit" onclick="toggleAsset('${val}', '${it}', ${!has})">Sửa</button>
                             </div>`;
                     }).join('');
                 }
@@ -343,10 +348,11 @@
                 const result = await res.json();
                 if(!result.success) alert("Lỗi cập nhật!");
                 else {
-                    // Update local DB to keep UI snappy
                     const asset = db.assets.find(a => norm(a['Biển số xe']) === norm(plate));
                     if(asset) asset[item] = val;
                     await saveDB(db);
+                    // Force re-render of the asset view
+                    selectItem(plate, 'suggest-q-assets', 'plate');
                 }
             } catch(e) { alert("Lỗi kết nối!"); }
             finally { document.getElementById('overlay').classList.add('hidden'); }
