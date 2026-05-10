@@ -157,6 +157,7 @@
 
         function clean(s) { if(!s) return ""; return String(s).replace(/\(.*?\)/g, '').replace(/\d{10,}/g, '').trim(); }
         function norm(s) { return String(s||'').replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); }
+        function findKey(obj, pattern) { return Object.keys(obj).find(k => k.toLowerCase().includes(pattern.toLowerCase())) || ''; }
 
         async function openDB() { return new Promise(res => { const r = indexedDB.open('XanhProERP_V12_ULTRA', 1); r.onupgradeneeded = () => r.result.createObjectStore('data'); r.onsuccess = () => res(r.result); }); }
         async function saveDB(d) { const idb = await openDB(); idb.transaction('data','readwrite').objectStore('data').put(d, 'db'); }
@@ -181,9 +182,9 @@
 
         function renderAll() {
             if(!db || !db.vehicles) return;
-            const statuses = ["Tất cả", ...new Set(db.vehicles.map(v => v['Trạng thái cấp 2'] || 'N/A'))];
+            const statuses = ["Tất cả", ...new Set(db.vehicles.map(v => v[findKey(v, 'Trạng thái cấp 2')] || 'N/A'))];
             document.getElementById('status-filters').innerHTML = statuses.map(s => `<div class="pill ${activeStatus === s ? 'active' : ''}" onclick="filterByStatus('${s}')">${s}</div>`).join('');
-            const groups = ["Tất cả tổ", ...new Set(db.offSchedule.map(o => o['Bạn ở tổ nào'] || 'N/A'))];
+            const groups = ["Tất cả tổ", ...new Set(db.offSchedule.map(o => o[findKey(o, 'tổ')] || 'N/A'))];
             document.getElementById('group-filters').innerHTML = groups.map(g => `<div class="pill ${activeGroup === g ? 'active' : ''}" onclick="filterByGroup('${g}')">${g}</div>`).join('');
             applyFilter(); applyOffFilter();
             document.getElementById('list-history').innerHTML = (db.handoverLogs || []).slice(-15).reverse().map(l => `
@@ -218,9 +219,13 @@
         function applyOffFilter() {
             const date = document.getElementById('off-date-picker').value;
             let data = db.offSchedule || [];
-            if(date) { const sDate = new Date(date).toLocaleDateString('en-CA'); data = data.filter(o => new Date(o['Ngày OFF']).toLocaleDateString('en-CA') === sDate); }
-            if(activeGroup !== "Tất cả tổ") data = data.filter(o => o['Bạn ở tổ nào'] === activeGroup);
-            document.getElementById('list-off').innerHTML = data.length > 0 ? data.map(o => `<div class="card"><div class="list-item"><div class="item-main"><div class="item-title">${clean(o['Họ Và Tên'])}</div><div class="item-sub">${o['Lý Do']} • Tổ: ${o['Bạn ở tổ nào']}</div></div></div></div>`).join('') : '<div style="text-align:center; padding:40px; color:#999;">Không có ai nghỉ.</div>';
+            const keyTo = findKey(data[0] || {}, 'tổ');
+            const keyLyDo = findKey(data[0] || {}, 'lý do');
+            const keyNgay = findKey(data[0] || {}, 'ngày');
+            
+            if(date) { const sDate = new Date(date).toLocaleDateString('en-CA'); data = data.filter(o => new Date(o[keyNgay]).toLocaleDateString('en-CA') === sDate); }
+            if(activeGroup !== "Tất cả tổ") data = data.filter(o => o[keyTo] === activeGroup);
+            document.getElementById('list-off').innerHTML = data.length > 0 ? data.map(o => `<div class="card"><div class="list-item"><div class="item-main"><div class="item-title">${clean(o[findKey(o, 'tên')])}</div><div class="item-sub">${o[keyLyDo]} • Tổ: ${o[keyTo] || 'N/A'}</div></div></div></div>`).join('') : '<div style="text-align:center; padding:40px; color:#999;">Không có ai nghỉ.</div>';
         }
 
         function suggestSmart(input, bid, type) {
