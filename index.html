@@ -107,10 +107,13 @@
         .density-badge { position: absolute; top: 10px; right: 10px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; }
         .crowded { background: #FFE5E5; color: #FF3B30; }
         .sparse { background: #E5F9E5; color: #34C759; }
-        #dispatch-suggestions { display: flex; overflow-x: auto; gap: 10px; padding: 5px 0 10px; scroll-snap-type: x mandatory; }
-        #dispatch-suggestions::-webkit-scrollbar { display: none; }
-        .dispatch-tip { min-width: 220px; flex-shrink: 0; background: #F2F2F7; padding: 12px; border-radius: 12px; font-size: 13px; border-left: 4px solid var(--ios-blue); cursor: pointer; transition: 0.2s; scroll-snap-align: start; }
-        .dispatch-tip:active { transform: scale(0.96); background: #E5E5EA; }
+        .map-stats-bar { display: flex; justify-content: space-around; background: white; margin: 0 12px 10px; padding: 12px; border-radius: 14px; border: 0.5px solid var(--ios-border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .stat-item { text-align: center; }
+        .stat-val { font-size: 18px; font-weight: 800; display: block; }
+        .stat-lab { font-size: 10px; font-weight: 700; color: var(--ios-secondary); text-transform: uppercase; }
+        
+        .btn-locate { position: absolute; bottom: 100px; right: 20px; width: 45px; height: 45px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 1000; border: none; font-size: 20px; }
+        .btn-locate:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
@@ -210,11 +213,10 @@
         </div>
 
         <div id="view-map" class="hidden">
-            <div class="section-title">Phân tích mật độ xe</div>
-            <div class="map-card" id="density-info">
-                <div style="font-weight:700; font-size:15px;">Theo dõi thời gian thực</div>
-                <div id="crowd-status" class="item-sub">Đang phân tích tọa độ...</div>
-                <div id="dispatch-suggestions"></div>
+            <div class="map-stats-bar">
+                <div class="stat-item"><span id="count-moving" class="stat-val" style="color:var(--ios-green)">0</span><span class="stat-lab">Đang chạy</span></div>
+                <div class="stat-item"><span id="count-idling" class="stat-val" style="color:var(--ios-yellow)">0</span><span class="stat-lab">Đang dừng</span></div>
+                <div class="stat-item"><span id="count-stopped" class="stat-val" style="color:var(--ios-red)">0</span><span class="stat-lab">Đứng yên</span></div>
             </div>
             <div class="sticky-box" style="top:0; background:transparent; padding:0 12px 10px; backdrop-filter:none;">
                 <div class="search-container" style="background:white; border:0.5px solid var(--ios-border); box-shadow:0 4px 12px rgba(0,0,0,0.05);">
@@ -222,7 +224,10 @@
                     <input type="text" id="q-map-search" placeholder="Tìm biển số trên bản đồ..." oninput="findVehicleOnMap()">
                 </div>
             </div>
-            <div id="map"></div>
+            <div style="position:relative;">
+                <div id="map"></div>
+                <button class="btn-locate" onclick="locateMe()">📍</button>
+            </div>
         </div>
 
         <div id="view-history" class="hidden"><div id="list-history"></div></div>
@@ -286,17 +291,17 @@
         function updateMarkers(locations) {
             if(!locations) return;
             const keys = Object.keys(locations);
-            let vehicleList = [];
+            let moving = 0, idling = 0, stopped = 0;
             
             keys.forEach(key => {
                 const loc = locations[key];
                 if(!loc.lat || !loc.lng) return;
-                vehicleList.push(loc);
                 
                 const speed = loc.speed || 0;
                 let color = "var(--ios-red)";
-                if(speed > 5) color = "var(--ios-green)";
-                else if(speed > 0) color = "var(--ios-yellow)";
+                if(speed > 5) { color = "var(--ios-green)"; moving++; }
+                else if(speed > 0) { color = "var(--ios-yellow)"; idling++; }
+                else { stopped++; }
 
                 const icon = L.divIcon({
                     className: 'custom-div-icon',
@@ -315,52 +320,17 @@
                     clusterGroup.addLayer(m);
                 }
             });
-            analyzeDensity(vehicleList);
+            document.getElementById('count-moving').innerText = moving;
+            document.getElementById('count-idling').innerText = idling;
+            document.getElementById('count-stopped').innerText = stopped;
         }
 
-        function analyzeDensity(list) {
-            // Updated density check: 10km radius as requested
-            const CROWD_THRESHOLD = 5; 
-            const DISTANCE_THRESHOLD = 10.0; // 10km
-            
-            let crowdedAreas = 0;
-            let suggestions = [];
-
-            list.forEach((v1, i) => {
-                let count = 0;
-                list.forEach((v2, j) => {
-                    if(i === j) return;
-                    const d = getDist(v1.lat, v1.lng, v2.lat, v2.lng);
-                    if(d < DISTANCE_THRESHOLD) count++;
-                });
-                if(count >= CROWD_THRESHOLD) {
-                    crowdedAreas++;
-                    if(suggestions.length < 5) {
-                        suggestions.push({
-                            name: v1.name,
-                            lat: v1.lat,
-                            lng: v1.lng,
-                            msg: `${v1.name} đang ở vùng đông xe (${count} xe gần đây).`
-                        });
-                    }
-                }
+        function locateMe() {
+            if(!navigator.geolocation) return alert("Trình duyệt không hỗ trợ định vị!");
+            navigator.geolocation.getCurrentPosition(pos => {
+                map.flyTo([pos.coords.latitude, pos.coords.longitude], 16);
+                L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(map).bindPopup("Vị trí của bạn").openPopup();
             });
-
-            const statusEl = document.getElementById('crowd-status');
-            const suggestEl = document.getElementById('dispatch-suggestions');
-            
-            if(crowdedAreas > 0) {
-                statusEl.innerHTML = `<span class="density-badge crowded">PHÁT HIỆN CỤM XE ĐÔNG</span> Hiện có ${crowdedAreas} xe đang ở vùng mật độ cao.`;
-                suggestEl.innerHTML = suggestions.map(s => `
-                    <div class="dispatch-tip" onclick="focusVehicle(${s.lat}, ${s.lng}, '${s.name}')">
-                        <div style="font-weight:700; color:black;">📍 ${s.name}</div>
-                        <div style="font-size:12px; color:var(--ios-secondary); margin-top:2px;">${s.msg} Nhấn để xem vị trí.</div>
-                    </div>
-                `).join('');
-            } else {
-                statusEl.innerHTML = `<span class="density-badge sparse">MẬT ĐỘ TỐT</span> Xe đang phân bổ đều, không có khu vực ùn ứ.`;
-                suggestEl.innerHTML = '';
-            }
         }
 
         function focusVehicle(lat, lng, name) {
