@@ -107,7 +107,8 @@
         .density-badge { position: absolute; top: 10px; right: 10px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; }
         .crowded { background: #FFE5E5; color: #FF3B30; }
         .sparse { background: #E5F9E5; color: #34C759; }
-        .dispatch-tip { background: #F2F2F7; padding: 10px; border-radius: 12px; font-size: 12px; margin-top: 10px; border-left: 4px solid var(--ios-blue); }
+        .dispatch-tip { background: #F2F2F7; padding: 12px; border-radius: 12px; font-size: 13px; margin-top: 10px; border-left: 4px solid var(--ios-blue); cursor: pointer; transition: 0.2s; }
+        .dispatch-tip:active { transform: scale(0.98); background: #E5E5EA; }
     </style>
 </head>
 <body>
@@ -326,7 +327,14 @@
                 });
                 if(count >= CROWD_THRESHOLD) {
                     crowdedAreas++;
-                    if(suggestions.length < 2) suggestions.push(`${v1.name} đang ở vùng đông xe, nên di chuyển ra khu vực thưa hơn.`);
+                    if(suggestions.length < 5) {
+                        suggestions.push({
+                            name: v1.name,
+                            lat: v1.lat,
+                            lng: v1.lng,
+                            msg: `${v1.name} đang ở vùng đông xe (${count} xe gần đây).`
+                        });
+                    }
                 }
             });
 
@@ -334,11 +342,27 @@
             const suggestEl = document.getElementById('dispatch-suggestions');
             
             if(crowdedAreas > 0) {
-                statusEl.innerHTML = `<span class="density-badge crowded">PHÁT HIỆN CỤM XE ĐÔNG</span> Hiện có ${crowdedAreas} khu vực tập trung đông xe.`;
-                suggestEl.innerHTML = suggestions.map(s => `<div class="dispatch-tip">💡 ${s}</div>`).join('');
+                statusEl.innerHTML = `<span class="density-badge crowded">PHÁT HIỆN CỤM XE ĐÔNG</span> Hiện có ${crowdedAreas} xe đang ở vùng mật độ cao.`;
+                suggestEl.innerHTML = suggestions.map(s => `
+                    <div class="dispatch-tip" onclick="focusVehicle(${s.lat}, ${s.lng}, '${s.name}')">
+                        <div style="font-weight:700; color:black;">📍 ${s.name}</div>
+                        <div style="font-size:12px; color:var(--ios-secondary); margin-top:2px;">${s.msg} Nhấn để xem vị trí.</div>
+                    </div>
+                `).join('');
             } else {
                 statusEl.innerHTML = `<span class="density-badge sparse">MẬT ĐỘ TỐT</span> Xe đang phân bổ đều, không có khu vực ùn ứ.`;
                 suggestEl.innerHTML = '';
+            }
+        }
+
+        function focusVehicle(lat, lng, name) {
+            map.flyTo([lat, lng], 16, { duration: 1.5 });
+            if(markers[name]) {
+                setTimeout(() => markers[name].openPopup(), 1500);
+            } else {
+                // Find by name in locations
+                const key = Object.keys(markers).find(k => markers[k].getPopup().getContent().includes(name));
+                if(key) setTimeout(() => markers[key].openPopup(), 1500);
             }
         }
 
