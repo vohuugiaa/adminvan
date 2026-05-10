@@ -105,13 +105,23 @@
                 <button class="tab-btn active" onclick="setSearchMode('vehicle', this)">🚘 XE</button>
                 <button class="tab-btn" onclick="setSearchMode('driver', this)">👤 TÀI XẾ</button>
             </div>
-            <div class="sticky-box" style="top:135px;">
+            
+            <!-- Tìm kiếm XE -->
+            <div id="search-vehicle-box" class="sticky-box" style="top:135px;">
                 <div class="search-container">
                     <i>🔍</i>
-                    <input type="text" id="q-search" placeholder="Biển số hoặc Số khung..." oninput="suggestSmart(this, 'suggest-q-search', 'plate')">
-                    <div id="suggest-q-search" class="suggest-box hidden"></div>
+                    <input type="text" id="q-search" placeholder="Biển số hoặc Số khung..." oninput="applyFilter()">
                 </div>
             </div>
+
+            <!-- Tìm kiếm TÀI XẾ -->
+            <div id="search-driver-box" class="sticky-box hidden" style="top:135px;">
+                <div class="search-container">
+                    <i>🔍</i>
+                    <input type="text" id="q-search-driver" placeholder="Tên hoặc Mã nhân viên (SAP)..." oninput="applyFilter()">
+                </div>
+            </div>
+
             <div class="filter-row" id="status-filters"></div>
             <div id="list-search"></div>
         </div>
@@ -191,9 +201,20 @@
             searchMode = m;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
+            
+            const vBox = document.getElementById('search-vehicle-box');
+            const dBox = document.getElementById('search-driver-box');
             const filters = document.getElementById('status-filters');
-            if(m === 'driver') filters.classList.add('hidden'); else filters.classList.remove('hidden');
-            document.getElementById('q-search').placeholder = m === 'vehicle' ? "Biển số hoặc Số khung..." : "Tên hoặc Mã nhân viên...";
+            
+            if(m === 'vehicle') {
+                vBox.classList.remove('hidden');
+                dBox.classList.add('hidden');
+                filters.classList.remove('hidden');
+            } else {
+                vBox.classList.add('hidden');
+                dBox.classList.remove('hidden');
+                filters.classList.add('hidden');
+            }
             applyFilter();
         }
 
@@ -231,13 +252,14 @@
         function filterByGroup(g) { activeGroup = g; applyOffFilter(); renderAll(); }
 
         function applyFilter() {
-            const q = norm(document.getElementById('q-search').value);
+            const qVeh = norm(document.getElementById('q-search').value);
+            const qDrv = norm(document.getElementById('q-search-driver').value);
             const listEl = document.getElementById('list-search');
             
             if(searchMode === 'vehicle') {
                 let list = db.vehicles;
                 if(activeStatus !== "Tất cả") list = list.filter(v => (v[findKey(v, 'Trạng thái cấp 2')] || 'N/A') === activeStatus);
-                if(q) list = list.filter(v => norm(v['Biển số']).includes(q) || norm(v['Số khung']).includes(q));
+                if(qVeh) list = list.filter(v => norm(v['Biển số']).includes(qVeh) || norm(v['Số khung']).includes(qVeh));
                 listEl.innerHTML = list.length > 0 ? list.map(v => {
                     const st = v[findKey(v, 'Trạng thái cấp 2')] || 'N/A';
                     const cl = st.toLowerCase().includes('vận doanh') ? 'st-vandoanh' : (st.toLowerCase().includes('nằm') ? 'st-xenam' : 'st-other');
@@ -245,11 +267,11 @@
                 }).join('') : '<div style="text-align:center; padding:40px; color:#999;">Không tìm thấy xe.</div>';
             } else {
                 let list = db.drivers;
-                if(q) {
+                if(qDrv) {
                     list = list.filter(d => {
                         const name = norm(d[findKey(d, 'Họ & tên')]);
                         const code = norm(d[findKey(d, 'SAP')]);
-                        return name.includes(q) || code.includes(q);
+                        return name.includes(qDrv) || code.includes(qDrv);
                     });
                 }
                 listEl.innerHTML = list.length > 0 ? list.map(d => {
