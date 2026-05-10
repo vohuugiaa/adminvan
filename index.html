@@ -214,6 +214,12 @@
                 <div id="crowd-status" class="item-sub">Đang phân tích tọa độ...</div>
                 <div id="dispatch-suggestions"></div>
             </div>
+            <div class="sticky-box" style="top:0; background:transparent; padding:0 12px 10px; backdrop-filter:none;">
+                <div class="search-container" style="background:white; border:0.5px solid var(--ios-border); box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+                    <i>🔍</i>
+                    <input type="text" id="q-map-search" placeholder="Tìm biển số trên bản đồ..." oninput="findVehicleOnMap()">
+                </div>
+            </div>
             <div id="map"></div>
         </div>
 
@@ -357,12 +363,18 @@
 
         function focusVehicle(lat, lng, name) {
             map.flyTo([lat, lng], 16, { duration: 1.5 });
-            if(markers[name]) {
-                setTimeout(() => markers[name].openPopup(), 1500);
-            } else {
-                // Find by name in locations
-                const key = Object.keys(markers).find(k => markers[k].getPopup().getContent().includes(name));
-                if(key) setTimeout(() => markers[key].openPopup(), 1500);
+            const key = Object.keys(markers).find(k => markers[k].getPopup().getContent().includes(name));
+            if(key) setTimeout(() => markers[key].openPopup(), 1500);
+        }
+
+        function findVehicleOnMap() {
+            const q = norm(document.getElementById('q-map-search').value);
+            if(!q) return;
+            const key = Object.keys(markers).find(k => norm(markers[k].getPopup().getContent()).includes(q));
+            if(key) {
+                const latlng = markers[key].getLatLng();
+                map.flyTo(latlng, 16, { duration: 1.5 });
+                setTimeout(() => markers[key].openPopup(), 1500);
             }
         }
 
