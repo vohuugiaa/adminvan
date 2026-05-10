@@ -5,120 +5,153 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Xanh SM Pro ERP</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --ios-blue: #007AFF;
-            --ios-bg: #F8F9FA;
-            --ios-card: #FFFFFF;
-            --ios-text: #1D1D1F;
-            --ios-secondary: #86868B;
-            --ios-border: rgba(0,0,0,0.06);
-            --ios-green: #34C759;
-            --ios-red: #FF3B30;
-            --ios-yellow: #FF9500;
-            --glass: rgba(255, 255, 255, 0.7);
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg: #F9FAFB;
+            --sidebar-bg: #111827;
+            --sidebar-text: #9CA3AF;
+            --sidebar-active: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --text-main: #111827;
+            --text-sub: #6B7280;
+            --border: #E5E7EB;
+            --success: #10B981;
+            --error: #EF4444;
+            --warning: #F59E0B;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--ios-bg); color: var(--ios-text); overflow-x: hidden; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
 
-        header { padding: 45px 30px 15px; background: var(--glass); backdrop-filter: saturate(180%) blur(25px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--ios-border); display: flex; justify-content: space-between; align-items: flex-end; margin-left: 65px; transition: margin-left 0.3s; }
-        header h1 { font-size: 30px; font-weight: 800; letter-spacing: -1.2px; color: #000; }
-        
-        .container { padding: 15px 0 60px; max-width: 1000px; margin-left: 80px; min-height: 100vh; transition: margin-left 0.3s; }
-        .hidden { display: none !important; }
-
-        nav { position: fixed; left: 0; top: 0; bottom: 0; width: 65px; background: #1D1D1F; display: flex; flex-direction: column; padding: 40px 0 20px; z-index: 2000; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; border-right: 1px solid rgba(255,255,255,0.1); }
+        /* Sidebar Navigation */
+        nav { width: 72px; background: var(--sidebar-bg); display: flex; flex-direction: column; align-items: center; padding: 24px 0; position: fixed; height: 100vh; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; }
         nav:hover { width: 220px; }
-        .nav-item { padding: 18px 0; width: 220px; display: flex; align-items: center; color: #86868B; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; position: relative; white-space: nowrap; }
-        .nav-item.active { color: white; background: rgba(255,255,255,0.08); }
-        .nav-item.active::after { content: ''; position: absolute; right: 0; top: 20%; height: 60%; width: 4px; background: var(--ios-blue); border-radius: 4px 0 0 4px; }
-        .nav-item i { font-size: 24px; min-width: 65px; text-align: center; font-style: normal; opacity: 0.6; transition: 0.3s; }
-        .nav-item span { opacity: 0; transition: 0.3s; margin-left: 5px; transform: translateX(-10px); }
-        nav:hover .nav-item span { opacity: 1; transform: translateX(0); }
-        .nav-item:hover { color: white; }
+        .nav-logo { width: 40px; height: 40px; background: var(--primary); border-radius: 10px; margin-bottom: 32px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 20px; }
+        .nav-item { width: 100%; padding: 14px 20px; display: flex; align-items: center; cursor: pointer; color: var(--sidebar-text); transition: 0.2s; position: relative; text-decoration: none; }
+        .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+        .nav-item.active { color: white; background: rgba(79, 70, 229, 0.2); }
+        .nav-item.active::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--primary); }
+        .nav-item i { min-width: 32px; text-align: center; font-size: 20px; }
+        .nav-item span { opacity: 0; font-size: 14px; font-weight: 600; white-space: nowrap; transition: 0.2s; margin-left: 16px; }
+        nav:hover .nav-item span { opacity: 1; }
 
-        .tab-switcher { background: rgba(118, 118, 128, 0.12); border-radius: 12px; padding: 2px; display: flex; margin: 0 15px 15px; }
-        .tab-btn { flex: 1; border: none; background: transparent; padding: 8px; border-radius: 10px; font-size: 13px; font-weight: 700; color: var(--ios-secondary); transition: 0.3s; }
-        .tab-btn.active { background: white; color: black; box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+        /* Main Wrapper */
+        .main-wrapper { flex: 1; margin-left: 72px; display: flex; flex-direction: column; width: calc(100% - 72px); min-height: 100vh; }
+        header { height: 64px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 1000; }
+        header h1 { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+        .container { padding: 32px; max-width: 1400px; margin: 0 auto; width: 100%; }
 
-        .sticky-box { position: sticky; top: 100px; background: var(--glass); backdrop-filter: blur(15px); padding: 12px 15px; z-index: 900; }
-        .search-container { background: white; border-radius: 14px; display: flex; align-items: center; padding: 12px 16px; position: relative; border: 1px solid var(--ios-border); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .search-container input { background: transparent; border: none; width: 100%; font-size: 16px; outline: none; font-weight: 500; color: #000; }
-        .search-container i { color: var(--ios-secondary); margin-right: 10px; font-style: normal; font-size: 18px; }
+        .btn-sync { background: white; border: 1px solid var(--border); padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--text-main); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-sync:hover { background: #F9FAFB; border-color: var(--text-sub); }
 
-        .filter-row { display: flex; overflow-x: auto; padding: 0 15px 15px; gap: 10px; }
-        .pill { white-space: nowrap; padding: 8px 18px; background: white; border: 1px solid var(--ios-border); border-radius: 100px; font-size: 12px; font-weight: 700; color: var(--ios-secondary); cursor: pointer; transition: 0.3s; }
-        .pill.active { background: var(--ios-blue); color: white; border-color: var(--ios-blue); box-shadow: 0 5px 15px rgba(0,122,255,0.3); }
-
-        .card { background: white; border-radius: 20px; margin: 0 15px 15px; padding: 20px; border: 1px solid var(--ios-border); box-shadow: 0 4px 20px rgba(0,0,0,0.02); transition: 0.3s; overflow: hidden; }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 12px 35px rgba(0,0,0,0.06); }
+        .card { background: white; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; padding: 24px; transition: 0.2s; }
+        .card:hover { border-color: var(--primary); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
         
-        .v-card { display: flex; flex-direction: column; gap: 12px; }
+        .tab-switcher { display: flex; gap: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+        .tab-btn { background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 700; color: var(--text-sub); cursor: pointer; position: relative; }
+        .tab-btn.active { color: var(--primary); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary); }
+
+        .sticky-box { position: sticky; top: 64px; background: var(--bg); padding: 16px 0; z-index: 900; }
+        .search-container { background: white; border-radius: 10px; display: flex; align-items: center; padding: 0 16px; border: 1px solid var(--border); height: 48px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .search-container i { color: var(--text-sub); margin-right: 12px; font-size: 16px; }
+        .search-container input { border: none; outline: none; width: 100%; font-size: 16px; background: transparent; font-weight: 500; }
+
+        .filter-row { display: flex; gap: 12px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 8px; }
+        .pill { white-space: nowrap; padding: 10px 20px; background: white; border: 1px solid var(--border); border-radius: 100px; font-size: 13px; font-weight: 600; color: var(--text-sub); cursor: pointer; transition: 0.2s; }
+        .pill.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2); }
+
+        .v-card { display: flex; flex-direction: column; gap: 16px; }
         .v-header { display: flex; justify-content: space-between; align-items: center; }
-        .v-plate { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; color: #000; }
-        .v-status { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
-        .st-vandoanh { background: #E8F5E9; color: #2E7D32; }
-        .st-xenam { background: #FFEBEE; color: #C62828; }
-        .st-other { background: #E3F2FD; color: #1565C0; }
-        
-        .v-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; border-top: 1px solid var(--ios-border); padding-top: 15px; }
-        .v-info-item { display: flex; flex-direction: column; }
-        .v-info-label { font-size: 10px; color: var(--ios-secondary); font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
-        .v-info-val { font-size: 14px; font-weight: 700; color: #1D1D1F; }
+        .v-plate { font-size: 22px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+        .status-pill { padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .st-vandoanh { background: #ECFDF5; color: #065F46; }
+        .st-xenam { background: #FEF2F2; color: #991B1B; }
+        .st-other { background: #F3F4F6; color: #374151; }
 
-        .map-stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0 15px 15px; }
-        .stat-widget { background: white; padding: 15px; border-radius: 20px; border: 1px solid var(--ios-border); text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .stat-val { font-size: 24px; font-weight: 900; display: block; margin-bottom: 2px; }
-        .stat-lab { font-size: 9px; font-weight: 800; color: var(--ios-secondary); text-transform: uppercase; }
+        .v-info { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; border-top: 1px solid var(--border); padding-top: 16px; }
+        .v-info-label { font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .v-info-val { font-size: 15px; font-weight: 600; color: var(--text-main); }
 
-        .section-title { padding: 20px 20px 10px; font-size: 11px; color: var(--ios-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
-        .form-group { background: white; border-radius: 22px; margin: 0 15px 15px; overflow: hidden; border: 1px solid var(--ios-border); }
-        .form-row { padding: 18px 20px; border-bottom: 1px solid var(--ios-border); display: flex; align-items: center; position: relative; }
-        .form-row label { width: 110px; font-size: 14px; font-weight: 700; color: #3A3A3C; }
-        .form-row input { border: none; outline: none; flex: 1; font-size: 16px; background: transparent; font-weight: 600; }
+        .map-stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 32px; }
+        .stat-widget { background: white; padding: 24px; border-radius: 12px; border: 1px solid var(--border); text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .stat-widget:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .stat-val { font-size: 32px; font-weight: 800; display: block; color: var(--text-main); }
+        .stat-lab { font-size: 12px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; margin-top: 8px; letter-spacing: 1px; }
 
-        #map { height: 100%; width: 100%; border-radius: 0; z-index: 1; }
-        .btn-locate { position: absolute; bottom: 30px; right: 30px; width: 50px; height: 50px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.15); z-index: 1000; border: none; font-size: 22px; }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 16px 24px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
 
-        #overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .loader { width: 40px; height: 40px; border: 4px solid #F2F2F7; border-top: 4px solid var(--ios-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        #map { height: calc(100vh - 220px); border-radius: 12px; border: 1px solid var(--border); z-index: 1; }
+
+        #overlay { position: fixed; inset: 0; background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; }
+        .loader { width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        #success-popup, #modal-list { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); background: rgba(255,255,255,0.98); backdrop-filter: blur(30px); padding: 30px; border-radius: 30px; z-index: 20000; display: flex; flex-direction: column; align-items: center; box-shadow: 0 30px 80px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid var(--ios-border); }
-        #success-popup.show, #modal-list.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
-        .modal-content { width: 100%; min-width: 280px; max-height: 450px; overflow-y: auto; margin-top: 20px; }
-        .modal-close { position: absolute; top: 20px; right: 25px; font-size: 24px; font-weight: 800; color: var(--ios-secondary); cursor: pointer; }
+        #modal-list { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 32px; border-radius: 16px; z-index: 20000; width: 450px; max-width: 95%; display: none; flex-direction: column; border: 1px solid var(--border); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        #modal-list.show { display: flex; }
+        .modal-close { position: absolute; top: 20px; right: 20px; cursor: pointer; color: var(--text-sub); font-size: 24px; }
         
-        .suggest-box { position: absolute; left: 0; right: 0; background: white; border-radius: 18px; z-index: 9999; border: 1px solid var(--ios-border); box-shadow: 0 15px 50px rgba(0,0,0,0.15); margin-top: 5px; max-height: 250px; overflow-y: auto; }
-        .suggest-item { padding: 14px 20px; border-bottom: 1px solid var(--ios-border); font-size: 15px; font-weight: 600; cursor: pointer; }
-        .suggest-item:hover { background: #F2F2F7; color: var(--ios-blue); }
+        .suggest-box { position: absolute; left: 0; right: 0; background: white; border-radius: 8px; z-index: 9999; border: 1px solid var(--border); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); margin-top: 4px; max-height: 250px; overflow-y: auto; }
+        .suggest-item { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 500; cursor: pointer; }
+        .suggest-item:hover { background: #F9FAFB; color: var(--primary); }
+
+        .section-title { font-size: 14px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 24px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .form-group { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; }
+        .form-row { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; position: relative; }
+        .form-row label { width: 140px; font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .form-row input { border: none; outline: none; flex: 1; font-size: 16px; font-weight: 600; color: var(--text-main); background: transparent; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px; }
+        .stat-card { background: white; padding: 24px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: 0.2s; }
+        .stat-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .stat-label { font-size: 13px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px; }
+        .stat-value { font-size: 32px; font-weight: 800; color: var(--text-main); }
+
+        #success-popup { position: fixed; bottom: 32px; right: 32px; background: #111827; color: white; padding: 16px 24px; border-radius: 12px; display: flex; align-items: center; gap: 12px; transform: translateY(100px); opacity: 0; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10000; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        #success-popup.show { transform: translateY(0); opacity: 1; }
+        .success-icon { width: 24px; height: 24px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
+    <nav>
+        <div class="nav-logo">X</div>
+        <div class="nav-item active" onclick="switchView('search')"><i class="fa-solid fa-magnifying-glass"></i><span>Tra cứu</span></div>
+        <div class="nav-item" onclick="switchView('map')"><i class="fa-solid fa-map-location-dot"></i><span>Bản đồ</span></div>
+        <div class="nav-item" onclick="switchView('dashboard')"><i class="fa-solid fa-chart-line"></i><span>Báo cáo</span></div>
+        <div class="nav-item" onclick="switchView('assets')"><i class="fa-solid fa-boxes-stacked"></i><span>Kiểm kê</span></div>
+        <div class="nav-item" onclick="switchView('handover')"><i class="fa-solid fa-file-signature"></i><span>Bàn giao</span></div>
+        <div class="nav-item" onclick="switchView('off')"><i class="fa-solid fa-calendar-xmark"></i><span>Lịch OFF</span></div>
+        <div class="nav-item" onclick="switchView('history')"><i class="fa-solid fa-clock-rotate-left"></i><span>Lịch sử</span></div>
+    </nav>
+
+    <div class="main-wrapper">
+        <header>
+            <h1 id="view-title">Hệ thống Điều hành</h1>
+            <button class="btn-sync" onclick="syncData()"><i class="fa-solid fa-arrows-rotate"></i> Đồng bộ dữ liệu</button>
+        </header>
+
+        <div class="container">
 
     <div id="overlay" class="hidden">
         <div class="loader"></div>
-        <p style="margin-top:20px; font-weight:800; color:var(--ios-blue);">Đang đồng bộ...</p>
+        <p style="margin-top:20px; font-weight:700; letter-spacing:1px;">ĐANG ĐỒNG BỘ DỮ LIỆU...</p>
     </div>
 
     <div id="success-popup">
-        <div class="success-icon">✓</div>
-        <div class="success-title">Thành công!</div>
-        <div class="success-msg">Dữ liệu đã được đồng bộ lên hệ thống.</div>
+        <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+        <div style="font-weight:700;">Đã cập nhật hệ thống thành công</div>
     </div>
 
     <div id="modal-list">
-        <span class="modal-close" onclick="closeModal()">✕</span>
-        <div id="modal-title" class="success-title">Danh sách xe</div>
-        <div id="modal-body" class="modal-content"></div>
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <div id="modal-title" style="font-size:18px; font-weight:800; margin-bottom:24px; color:var(--text-main); border-bottom:1px solid var(--border); padding-bottom:12px;"></div>
+        <div id="modal-body" style="max-height:400px; overflow-y:auto;"></div>
     </div>
 
     <header>
@@ -129,23 +162,23 @@
     <div class="container">
         <div id="view-search">
             <div class="tab-switcher">
-                <button class="tab-btn active" onclick="setSearchMode('vehicle', this)">🚘 XE</button>
-                <button class="tab-btn" onclick="setSearchMode('driver', this)">👤 TÀI XẾ</button>
+                <button class="tab-btn active" onclick="setSearchMode('vehicle', this)"><i class="fa-solid fa-car"></i> ĐỘI XE</button>
+                <button class="tab-btn" onclick="setSearchMode('driver', this)"><i class="fa-solid fa-id-card"></i> NHÂN SỰ</button>
             </div>
             
             <!-- Tìm kiếm XE -->
-            <div id="search-vehicle-box" class="sticky-box" style="top:135px;">
+            <div id="search-vehicle-box" class="sticky-box">
                 <div class="search-container">
-                    <i>🔍</i>
-                    <input type="text" id="q-search" placeholder="Biển số hoặc Số khung..." oninput="applyFilter()">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="q-search" placeholder="Nhập biển số hoặc số khung..." oninput="applyFilter()">
                 </div>
             </div>
 
             <!-- Tìm kiếm TÀI XẾ -->
-            <div id="search-driver-box" class="sticky-box hidden" style="top:135px;">
+            <div id="search-driver-box" class="sticky-box hidden">
                 <div class="search-container">
-                    <i>🔍</i>
-                    <input type="text" id="q-search-driver" placeholder="Tên hoặc Mã nhân viên (SAP)..." oninput="applyFilter()">
+                    <i class="fa-solid fa-user-tag"></i>
+                    <input type="text" id="q-search-driver" placeholder="Tìm tên hoặc mã SAP..." oninput="applyFilter()">
                 </div>
             </div>
 
@@ -154,17 +187,17 @@
         </div>
 
         <div id="view-assets" class="hidden">
-            <div class="section-title">Kiểm kê vật tư</div>
-            <div class="sticky-box" style="top:150px;">
+            <div class="section-title">Kiểm kê vật tư định kỳ</div>
+            <div class="sticky-box">
                 <div class="search-container">
-                    <i>🔍</i>
-                    <input type="text" id="q-assets" placeholder="Gõ biển số xe..." oninput="suggestSmart(this, 'suggest-q-assets', 'plate')">
+                    <i class="fa-solid fa-barcode"></i>
+                    <input type="text" id="q-assets" placeholder="Gõ biển số xe để kiểm kê..." oninput="suggestSmart(this, 'suggest-q-assets', 'plate')">
                     <div id="suggest-q-assets" class="suggest-box hidden"></div>
                 </div>
             </div>
             <div id="display-assets" class="hidden">
-                <div class="card" style="padding: 20px; margin: 20px 12px; border: 1.5px solid var(--ios-blue);">
-                    <h2 id="plate-title" style="color:var(--ios-blue); margin-bottom:15px; font-size:28px; font-weight:900;"></h2>
+                <div class="card" style="border-left: 5px solid var(--primary);">
+                    <h2 id="plate-title" style="color:var(--text-main); margin-bottom:20px; font-size:24px; font-weight:800;"></h2>
                     <div id="items-assets"></div>
                 </div>
             </div>
@@ -174,77 +207,103 @@
             <div class="section-title">Thông tin phương tiện</div>
             <div class="form-group">
                 <div class="form-row">
-                    <label>Biển số</label>
-                    <input type="text" id="h-plate" placeholder="Gõ biển số..." oninput="suggestSmart(this, 'suggest-h-plate', 'plate')">
-                    <div id="suggest-h-plate" class="suggest-box show-top hidden"></div>
+                    <label><i class="fa-solid fa-hashtag"></i> Biển số</label>
+                    <input type="text" id="h-plate" placeholder="Nhập biển số..." oninput="suggestSmart(this, 'suggest-h-plate', 'plate')">
+                    <div id="suggest-h-plate" class="suggest-box hidden"></div>
                 </div>
-                <div class="form-row"><label>Số ODO</label><input type="number" id="h-odo" placeholder="Số KM hiện tại"></div>
+                <div class="form-row">
+                    <label><i class="fa-solid fa-gauge"></i> Chỉ số ODO</label>
+                    <input type="number" id="h-odo" placeholder="Số KM hiện tại">
+                </div>
             </div>
-            <div class="section-title">Nhân sự bàn giao</div>
+            
+            <div class="section-title">Thông tin nhân sự</div>
             <div class="form-group">
                 <div class="form-row">
-                    <label>Người giao</label>
-                    <input type="text" id="h-sender" placeholder="Họ tên hoặc MSNV..." oninput="suggestSmart(this, 'suggest-h-sender', 'driver')">
-                    <div id="suggest-h-sender" class="suggest-box show-top hidden"></div>
+                    <label><i class="fa-solid fa-user-export"></i> Người giao</label>
+                    <input type="text" id="h-sender" placeholder="Họ tên hoặc mã SAP..." oninput="suggestSmart(this, 'suggest-h-sender', 'driver')">
+                    <div id="suggest-h-sender" class="suggest-box hidden"></div>
                 </div>
                 <div class="form-row">
-                    <label>Người nhận</label>
-                    <input type="text" id="h-receiver" placeholder="Họ tên hoặc MSNV..." oninput="suggestSmart(this, 'suggest-h-receiver', 'driver')">
-                    <div id="suggest-h-receiver" class="suggest-box show-top hidden"></div>
+                    <label><i class="fa-solid fa-user-import"></i> Người nhận</label>
+                    <input type="text" id="h-receiver" placeholder="Họ tên hoặc mã SAP..." oninput="suggestSmart(this, 'suggest-h-receiver', 'driver')">
+                    <div id="suggest-h-receiver" class="suggest-box hidden"></div>
                 </div>
             </div>
-            <div class="form-group"><div class="form-row"><label>Ghi chú</label><input type="text" id="h-notes" placeholder="Tình trạng xe..."></div></div>
-            <div class="photo-box" onclick="document.getElementById('h-cam').click()">📸 CHỤP BIÊN BẢN<img id="h-prev" class="hidden"><input type="file" id="h-cam" accept="image/*" capture="environment" class="hidden" onchange="previewImg(this)"></div>
-            <button class="btn-ios" onclick="processHandover()">XÁC NHẬN BÀN GIAO</button>
+
+            <div class="form-group">
+                <div class="form-row">
+                    <label><i class="fa-solid fa-comment-dots"></i> Ghi chú</label>
+                    <input type="text" id="h-notes" placeholder="Tình trạng xe, trầy xước...">
+                </div>
+            </div>
+
+            <div style="background:white; border:2px dashed var(--border); border-radius:12px; padding:32px; text-align:center; margin-bottom:24px; cursor:pointer;" onclick="document.getElementById('h-cam').click()">
+                <i class="fa-solid fa-camera" style="font-size:32px; color:var(--text-sub); margin-bottom:12px; display:block;"></i>
+                <span style="font-weight:700; color:var(--text-sub);">CHỤP ẢNH BIÊN BẢN</span>
+                <img id="h-prev" class="hidden" style="margin-top:16px; border-radius:8px; width:100%;">
+                <input type="file" id="h-cam" accept="image/*" capture="environment" class="hidden" onchange="previewImg(this)">
+            </div>
+            
+            <button class="btn-primary" onclick="processHandover()">XÁC NHẬN BÀN GIAO</button>
         </div>
 
         <div id="view-off" class="hidden">
-            <div class="form-group" style="margin-top:20px;"><div class="form-row"><label>Ngày OFF</label><input type="date" id="off-date-picker" onchange="applyOffFilter()"></div></div>
+            <div class="section-title">Lịch nghỉ nhân sự</div>
+            <div class="form-group">
+                <div class="form-row">
+                    <label><i class="fa-solid fa-calendar-day"></i> Ngày xem</label>
+                    <input type="date" id="off-date-picker" onchange="applyOffFilter()">
+                </div>
+            </div>
             <div class="filter-row" id="group-filters"></div>
             <div id="list-off"></div>
         </div>
 
-        <div id="view-map" class="hidden" style="display: flex; flex-direction: column; height: calc(100vh - 100px); padding-bottom: 10px;">
+        <div id="view-map" class="hidden">
             <div class="map-stats-bar">
-                <div class="stat-widget" onclick="showMapList('moving')"><span id="count-moving" class="stat-val" style="color:var(--ios-green)">0</span><span class="stat-lab">Đang chạy</span></div>
-                <div class="stat-widget" onclick="showMapList('idling')"><span id="count-idling" class="stat-val" style="color:var(--ios-yellow)">0</span><span class="stat-lab">Đang dừng</span></div>
-                <div class="stat-widget" onclick="showMapList('stopped')"><span id="count-stopped" class="stat-val" style="color:var(--ios-red)">0</span><span class="stat-lab">Đứng yên</span></div>
+                <div class="stat-widget" onclick="showMapList('moving')"><span id="count-moving" class="stat-val" style="color:var(--success)">0</span><span class="stat-lab">Đang chạy</span></div>
+                <div class="stat-widget" onclick="showMapList('idling')"><span id="count-idling" class="stat-val" style="color:var(--warning)">0</span><span class="stat-lab">Đang dừng</span></div>
+                <div class="stat-widget" onclick="showMapList('stopped')"><span id="count-stopped" class="stat-val" style="color:var(--error)">0</span><span class="stat-lab">Đứng yên</span></div>
             </div>
-            <div style="padding:0 12px 8px;">
-                <div class="search-container" style="background:white; border:0.5px solid var(--ios-border); box-shadow:0 4px 12px rgba(0,0,0,0.05); margin-bottom:0;">
-                    <i>🔍</i>
-                    <input type="text" id="q-map-search" placeholder="Tìm biển số trên bản đồ..." oninput="findVehicleOnMap()">
-                </div>
+            <div class="search-container" style="margin-bottom:24px;">
+                <i class="fa-solid fa-location-dot"></i>
+                <input type="text" id="q-map-search" placeholder="Tìm biển số trên bản đồ..." oninput="findVehicleOnMap()">
             </div>
-            <div style="flex:1; position:relative; margin: 0 12px; border-radius: 20px; overflow: hidden; border: 0.5px solid var(--ios-border); box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                <div id="map" style="height: 100%; width: 100%; border-radius: 0; margin-top: 0;"></div>
-                <button class="btn-locate" onclick="locateMe()">📍</button>
+            <div style="position:relative;">
+                <div id="map"></div>
+                <button class="btn-primary" style="position:absolute; bottom:24px; right:24px; width:56px; height:56px; border-radius:14px; padding:0; z-index:1000;" onclick="locateMe()"><i class="fa-solid fa-crosshairs"></i></button>
             </div>
         </div>
 
         <div id="view-dashboard" class="hidden">
-            <div class="section-title">Hiệu suất đội xe</div>
-            <div class="card" style="padding: 20px;">
-                <canvas id="chart-status" style="max-height: 250px;"></canvas>
+            <div class="section-title">Tổng quan đội xe</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Tỷ lệ vận doanh</span>
+                    <span class="stat-value" id="stat-active-rate">0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Tổng số phương tiện</span>
+                    <span class="stat-value" id="stat-total-cars">0</span>
+                </div>
             </div>
-            <div class="section-title">Tần suất bàn giao (7 ngày qua)</div>
-            <div class="card" style="padding: 20px;">
-                <canvas id="chart-handover" style="max-height: 200px;"></canvas>
+            <div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
+                <div class="card">
+                    <canvas id="chart-status"></canvas>
+                </div>
+                <div class="card">
+                    <canvas id="chart-handover"></canvas>
+                </div>
             </div>
         </div>
 
-        <div id="view-history" class="hidden"><div id="list-history"></div></div>
-    </div>
-
-    <nav>
-        <div class="nav-item active" onclick="switchView('search')"><i>🔍</i><span>Tra cứu</span></div>
-        <div class="nav-item" onclick="switchView('map')"><i>📍</i><span>Bản đồ</span></div>
-        <div class="nav-item" onclick="switchView('dashboard')"><i>📊</i><span>Báo cáo</span></div>
-        <div class="nav-item" onclick="switchView('assets')"><i>📦</i><span>Kiểm kê</span></div>
-        <div class="nav-item" onclick="switchView('handover')"><i>📝</i><span>Bàn giao</span></div>
-        <div class="nav-item" onclick="switchView('off')"><i>📅</i><span>Lịch OFF</span></div>
-        <div class="nav-item" onclick="switchView('history')"><i>📜</i><span>Lịch sử</span></div>
-    </nav>
+        <div id="view-history" class="hidden">
+            <div class="section-title">Lịch sử bàn giao gần đây</div>
+            <div id="list-history"></div>
+        </div>
+    </div> <!-- End container -->
+</div> <!-- End main-wrapper -->
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyKTYxBbcMfOM_w1Olp3lrAE3ErTA-thhlmBlKBajqqenLdMB8SfKjCkyYYy6Du4fO4/exec";
@@ -263,9 +322,17 @@
 
         function switchView(id) {
             document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
-            document.getElementById(`view-${id}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', ['search','map','dashboard','assets','handover','off','history'][i] === id));
-            document.getElementById('view-title').innerText = {search:'Tra cứu', map:'Bản đồ Admin', dashboard:'Phân tích', assets:'Kiểm kê', handover:'Bàn giao', off:'Lịch OFF', history:'Lịch sử'}[id];
+            const target = document.getElementById(`view-${id}`);
+            if(target) target.classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-item').forEach(n => {
+                const onclick = n.getAttribute('onclick');
+                n.classList.toggle('active', onclick && onclick.includes(`'${id}'`));
+            });
+
+            const titles = {search:'Hệ thống Tra cứu', map:'Bản đồ Điều hành', dashboard:'Phân tích Hiệu suất', assets:'Kiểm kê Vật tư', handover:'Bàn giao Phương tiện', off:'Lịch nghỉ Nhân sự', history:'Lịch sử Hệ thống'};
+            document.getElementById('view-title').innerText = titles[id] || 'Điều hành';
+            
             if(id === 'search') applyFilter();
             if(id === 'map') initAdminMap();
             if(id === 'dashboard') initDashboard();
@@ -284,16 +351,27 @@
                 else statusCounts['Khác']++;
             });
 
+            // Update Statistics
+            const total = db.vehicles.length;
+            document.getElementById('stat-total-cars').innerText = total;
+            const activeRate = total > 0 ? Math.round((statusCounts['Vận doanh'] / total) * 100) : 0;
+            document.getElementById('stat-active-rate').innerText = activeRate + '%';
+
             charts.status = new Chart(document.getElementById('chart-status'), {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(statusCounts),
-                    datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#34C759', '#FF3B30', '#E5E5EA'] }]
+                    datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#10B981', '#EF4444', '#E5E7EB'] }]
                 },
-                options: { plugins: { title: { display: true, text: 'Trạng thái đội xe' } } }
+                options: { 
+                    plugins: { 
+                        title: { display: true, text: 'Tỷ lệ hoạt động đội xe', font: { weight: 'bold', size: 14 } },
+                        legend: { position: 'bottom' }
+                    },
+                    cutout: '70%'
+                }
             });
 
-            // Handover history last 7 days
             const labels = [], counts = [];
             for(let i=6; i>=0; i--) {
                 const d = new Date(); d.setDate(d.getDate()-i);
@@ -306,7 +384,11 @@
                 type: 'bar',
                 data: {
                     labels: labels,
-                    datasets: [{ label: 'Lượt bàn giao', data: counts, backgroundColor: '#007AFF' }]
+                    datasets: [{ label: 'Lượt bàn giao', data: counts, backgroundColor: '#4F46E5', borderRadius: 6 }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
                 }
             });
         }
@@ -345,11 +427,11 @@
                 if(!loc.lat || !loc.lng) return;
                 
                 const speed = loc.speed || 0;
-                let color = "var(--ios-red)";
+                let color = "var(--error)";
                 let statusKey = 'stopped';
 
-                if(speed > 5) { color = "var(--ios-green)"; moving++; statusKey = 'moving'; }
-                else if(speed > 0) { color = "var(--ios-yellow)"; idling++; statusKey = 'idling'; }
+                if(speed > 5) { color = "var(--success)"; moving++; statusKey = 'moving'; }
+                else if(speed > 0) { color = "var(--warning)"; idling++; statusKey = 'idling'; }
                 else { stopped++; }
 
                 vehicleGroups[statusKey].push(loc.name);
@@ -384,12 +466,12 @@
         function showMapList(type) {
             const list = vehicleGroups[type];
             if(!list || list.length === 0) return;
-            const titles = { moving: 'Xe đang chạy', idling: 'Xe đang dừng', stopped: 'Xe đứng yên' };
-            document.getElementById('modal-title').innerText = titles[type];
+            const titles = { moving: 'Danh sách xe đang di chuyển', idling: 'Danh sách xe đang dừng', stopped: 'Danh sách xe đứng yên' };
+            document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-list-ul"></i> ${titles[type]}`;
             document.getElementById('modal-body').innerHTML = list.map(p => `
-                <div style="padding:10px; border-bottom:0.5px solid #eee; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
-                    <span>${p}</span>
-                    <button style="border:none; background:var(--ios-bg); color:var(--ios-blue); padding:5px 10px; border-radius:8px; font-size:11px; font-weight:800;" onclick="closeModal(); findVehicleOnMap('${p}')">XEM</button>
+                <div style="padding:16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; font-size:15px;">${p}</span>
+                    <button style="border:1px solid var(--primary); background:none; color:var(--primary); padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;" onclick="closeModal(); findVehicleOnMap('${p}')">ĐỊNH VỊ</button>
                 </div>
             `).join('');
             document.getElementById('modal-list').classList.add('show');
@@ -462,25 +544,39 @@
             if(!db || !db.vehicles) return;
             const statuses = ["Tất cả", ...new Set(db.vehicles.map(v => v[findKey(v, 'Trạng thái cấp 2')] || 'N/A'))];
             document.getElementById('status-filters').innerHTML = statuses.map(s => `<div class="pill ${activeStatus === s ? 'active' : ''}" onclick="filterByStatus('${s}')">${s}</div>`).join('');
+            
             const groups = ["Tất cả tổ", ...new Set(db.offSchedule.map(o => o[findKey(o, 'tổ')] || 'N/A'))];
             document.getElementById('group-filters').innerHTML = groups.map(g => `<div class="pill ${activeGroup === g ? 'active' : ''}" onclick="filterByGroup('${g}')">${g}</div>`).join('');
+            
             applyFilter(); applyOffFilter();
+            
+            // Render History with Modern Look
             document.getElementById('list-history').innerHTML = (db.handoverLogs || []).slice(-15).reverse().map(l => `
                 <div class="card">
-                    <div class="list-item">
-                        <div class="item-main">
-                            <div class="item-title">${l['Biển số xe']}</div>
-                            <div class="item-sub">${clean(l['Người giao'])} → ${clean(l['Người nhận'])}</div>
-                            <div style="font-size:11px; color:#999; margin-top:5px;">ODO: ${l['Số KM (ODO)']} KM</div>
-                            ${l['Link ảnh biên bản'] ? `<a href="${l['Link ảnh biên bản']}" target="_blank" style="font-size:12px; color:var(--ios-blue); font-weight:800; display:block; margin-top:8px;">📂 XEM BIÊN BẢN</a>` : ''}
+                    <div style="display:flex; gap:16px; align-items:start;">
+                        <div style="width:40px; height:40px; background:#EEF2FF; border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--primary);">
+                            <i class="fa-solid fa-file-contract"></i>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                                <span style="font-weight:800; font-size:16px;">${l['Biển số xe']}</span>
+                                <span style="font-size:12px; color:var(--text-sub); font-weight:600;">${l['Ngày bàn giao'] || ''}</span>
+                            </div>
+                            <div style="font-size:14px; font-weight:600; color:var(--text-sub); margin-bottom:8px;">
+                                <i class="fa-solid fa-user-arrow-right" style="font-size:12px;"></i> ${clean(l['Người giao'])} <span style="margin:0 4px;">→</span> ${clean(l['Người nhận'])}
+                            </div>
+                            <div style="display:flex; gap:12px; align-items:center;">
+                                <span style="font-size:12px; background:#F9FAFB; padding:4px 8px; border-radius:4px; font-weight:700;">ODO: ${l['Số KM (ODO)']} KM</span>
+                                ${l['Link ảnh biên bản'] ? `<a href="${l['Link ảnh biên bản']}" target="_blank" style="font-size:12px; color:var(--primary); font-weight:700; text-decoration:none;"><i class="fa-solid fa-image"></i> BIÊN BẢN</a>` : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        function filterByStatus(s) { activeStatus = s; applyFilter(); renderAll(); }
-        function filterByGroup(g) { activeGroup = g; applyOffFilter(); renderAll(); }
+        function filterByStatus(s) { activeStatus = s; applyFilter(); }
+        function filterByGroup(g) { activeGroup = g; applyOffFilter(); }
 
         function applyFilter() {
             const qVeh = norm(document.getElementById('q-search').value);
@@ -491,6 +587,7 @@
                 let list = db.vehicles;
                 if(activeStatus !== "Tất cả") list = list.filter(v => (v[findKey(v, 'Trạng thái cấp 2')] || 'N/A') === activeStatus);
                 if(qVeh) list = list.filter(v => norm(v['Biển số']).includes(qVeh) || norm(v['Số khung']).includes(qVeh));
+                
                 listEl.innerHTML = list.length > 0 ? list.map(v => {
                     const st = v[findKey(v, 'Trạng thái cấp 2')] || 'N/A';
                     const driver = v[findKey(v, 'Tài xế')] || 'Chưa gán';
@@ -499,22 +596,22 @@
                         <div class="card">
                             <div class="v-card">
                                 <div class="v-header">
-                                    <div class="v-plate">${v['Biển số'] || 'N/A'}</div>
-                                    <div class="v-status ${cl}">${st}</div>
+                                    <div class="v-plate"><i class="fa-solid fa-car-side" style="color:var(--primary); font-size:18px; margin-right:8px;"></i>${v['Biển số'] || 'N/A'}</div>
+                                    <div class="status-pill ${cl}">${st}</div>
                                 </div>
                                 <div class="v-info">
                                     <div class="v-info-item">
-                                        <span class="v-info-label">Số khung</span>
+                                        <span class="v-info-label">Số khung / Model</span>
                                         <span class="v-info-val">${v['Số khung'] || 'N/A'}</span>
                                     </div>
                                     <div class="v-info-item">
-                                        <span class="v-info-label">Tài xế hiện tại</span>
-                                        <span class="v-info-val" style="color:var(--ios-blue)">👤 ${driver}</span>
+                                        <span class="v-info-label">Tài xế phụ trách</span>
+                                        <span class="v-info-val" style="color:var(--primary)"><i class="fa-solid fa-user-tie"></i> ${driver}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>`;
-                }).join('') : '<div style="text-align:center; padding:40px; color:#999;">Không tìm thấy xe.</div>';
+                }).join('') : '<div style="text-align:center; padding:60px; color:var(--text-sub);"><i class="fa-solid fa-magnifying-glass" style="font-size:32px; display:block; margin-bottom:12px; opacity:0.3;"></i> Không tìm thấy phương tiện.</div>';
             } else {
                 let list = db.drivers;
                 if(qDrv) {
@@ -530,16 +627,23 @@
                     const phone = d[findKey(d, 'Số điện thoại')] || d[findKey(d, 'SĐT')] || '';
                     return `
                         <div class="card">
-                            <div class="list-item">
-                                <div class="item-main">
-                                    <div class="item-title" style="text-transform:uppercase;">${name}</div>
-                                    <div class="item-sub">MSNV (SAP): ${code}</div>
-                                    <div class="item-sub" style="color:var(--ios-blue); font-weight:700;">📞 ${phone || 'Chưa có SĐT'}</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; gap:16px; align-items:center;">
+                                    <div style="width:48px; height:48px; background:#F3F4F6; border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--text-sub); font-size:20px;">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:800; font-size:16px; color:var(--text-main); text-transform:uppercase; margin-bottom:2px;">${name}</div>
+                                        <div style="font-size:13px; font-weight:600; color:var(--text-sub);">MSNV: <span style="color:var(--text-main);">${code}</span></div>
+                                    </div>
                                 </div>
-                                ${phone ? `<a href="tel:${phone}" class="status-badge st-vandoanh" style="text-decoration:none; display:flex; align-items:center; gap:5px;">📞 GỌI</a>` : ''}
+                                ${phone ? `
+                                <a href="tel:${phone}" style="width:40px; height:40px; background:var(--success); color:white; border-radius:10px; display:flex; align-items:center; justify-content:center; text-decoration:none; box-shadow:0 4px 10px rgba(16,185,129,0.2);">
+                                    <i class="fa-solid fa-phone"></i>
+                                </a>` : ''}
                             </div>
                         </div>`;
-                }).join('') : '<div style="text-align:center; padding:40px; color:#999;">Không tìm thấy tài xế.</div>';
+                }).join('') : '<div style="text-align:center; padding:60px; color:var(--text-sub);"><i class="fa-solid fa-user-slash" style="font-size:32px; display:block; margin-bottom:12px; opacity:0.3;"></i> Không tìm thấy tài xế.</div>';
             }
         }
 
