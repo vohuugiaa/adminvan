@@ -1111,11 +1111,17 @@
                             <div class="list-item">
                                 <div class="item-avatar">${v[kPlate].substring(0, 2)}</div>
                                 <div class="item-main">
-                                    <div class="item-title">${v[kPlate] || 'N/A'}</div>
-                                    <div class="item-sub" style="color:var(--ios-blue); font-weight:700;">👤 ${driverName}</div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                                        <div class="item-title">${driverName}</div>
+                                        <div style="font-size:12px; color:#8E8E93; flex-shrink:0; margin-left:8px;">${v[kPlate] || 'N/A'}</div>
+                                    </div>
                                     <div class="item-sub">Khung: ${v[kVin] || 'N/A'}</div>
+                                    <div style="margin-top:6px;">
+                                        <span style="background:#F2F2F7; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:700; color:#707070; display:inline-flex; align-items:center;">
+                                            <span style="margin-right:4px; font-size:10px; color:${cl==='st-vandoanh' ? '#34C759' : '#FF3B30'}">🏷️</span> ${st}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="status-badge ${cl}">${st}</div>
                             </div>
                         </div>`;
                 }).join('') : '<div style="text-align:center; padding:40px; color:#999;">Không tìm thấy xe.</div>';
@@ -1136,12 +1142,19 @@
                     return `
                         <div class="card">
                             <div class="list-item">
+                                <div class="item-avatar">${name.substring(0, 1)}</div>
                                 <div class="item-main">
-                                    <div class="item-title" style="text-transform:uppercase;">${name}</div>
-                                    <div class="item-sub">MSNV (SAP): ${code}</div>
-                                    <div class="item-sub" style="color:var(--ios-blue); font-weight:700;">📞 ${phone || 'Chưa có SĐT'}</div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                                        <div class="item-title" style="text-transform:capitalize;">${name.toLowerCase()}</div>
+                                        <div style="font-size:12px; color:#8E8E93; flex-shrink:0; margin-left:8px;">${code}</div>
+                                    </div>
+                                    <div class="item-sub" style="margin-bottom:6px;">SĐT: ${phone || 'Chưa có thông tin'}</div>
+                                    ${phone ? `<div style="margin-top:4px;">
+                                        <a href="tel:${phone}" style="background:#F2F2F7; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:700; color:#707070; display:inline-flex; align-items:center; text-decoration:none;">
+                                            <span style="margin-right:4px; font-size:10px; color:#34C759;">📞</span> GỌI ĐIỆN
+                                        </a>
+                                    </div>` : ''}
                                 </div>
-                                ${phone ? `<a href="tel:${phone}" class="status-badge st-vandoanh" style="text-decoration:none; display:flex; align-items:center; gap:5px;">📞 GỌI</a>` : ''}
                             </div>
                         </div>`;
                 }).join('') : '<div style="text-align:center; padding:40px; color:#999;">Không tìm thấy tài xế.</div>';
