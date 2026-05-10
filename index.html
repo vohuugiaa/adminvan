@@ -6,6 +6,8 @@
     <title>Xanh SM Pro ERP</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --ios-blue: #007AFF;
@@ -95,6 +97,14 @@
         .success-icon { width: 60px; height: 60px; background: var(--ios-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(52,199,89,0.3); }
         .success-title { font-weight: 800; font-size: 18px; color: #000; margin-bottom: 5px; }
         .success-msg { font-size: 14px; color: var(--ios-secondary); text-align: center; }
+
+        /* Map Styles */
+        #map { height: calc(100vh - 180px); width: 100%; border-radius: 20px; border: 0.5px solid var(--ios-border); margin-top: 10px; z-index: 1; }
+        .map-card { background: white; border-radius: 14px; margin: 0 12px 10px; padding: 15px; border: 0.5px solid var(--ios-border); position: relative; }
+        .density-badge { position: absolute; top: 10px; right: 10px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; }
+        .crowded { background: #FFE5E5; color: #FF3B30; }
+        .sparse { background: #E5F9E5; color: #34C759; }
+        .dispatch-tip { background: #F2F2F7; padding: 10px; border-radius: 12px; font-size: 12px; margin-top: 10px; border-left: 4px solid var(--ios-blue); }
     </style>
 </head>
 <body>
@@ -193,11 +203,22 @@
             <div id="list-off"></div>
         </div>
 
+        <div id="view-map" class="hidden">
+            <div class="section-title">Phân tích mật độ xe</div>
+            <div class="map-card" id="density-info">
+                <div style="font-weight:700; font-size:15px;">Theo dõi thời gian thực</div>
+                <div id="crowd-status" class="item-sub">Đang phân tích tọa độ...</div>
+                <div id="dispatch-suggestions"></div>
+            </div>
+            <div id="map"></div>
+        </div>
+
         <div id="view-history" class="hidden"><div id="list-history"></div></div>
     </div>
 
     <nav>
         <div class="nav-item active" onclick="switchView('search')"><i>🔍</i><span>Tra cứu</span></div>
+        <div class="nav-item" onclick="switchView('map')"><i>📍</i><span>Bản đồ</span></div>
         <div class="nav-item" onclick="switchView('assets')"><i>📦</i><span>Kiểm kê</span></div>
         <div class="nav-item" onclick="switchView('handover')"><i>📝</i><span>Bàn giao</span></div>
         <div class="nav-item" onclick="switchView('off')"><i>📅</i><span>Lịch OFF</span></div>
@@ -206,8 +227,10 @@
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyKTYxBbcMfOM_w1Olp3lrAE3ErTA-thhlmBlKBajqqenLdMB8SfKjCkyYYy6Du4fO4/exec";
+        const FIREBASE_URL = "https://vanmap-live-default-rtdb.asia-southeast1.firebasedatabase.app/";
         let db = { vehicles: [], drivers: [], assets: [], offSchedule: [], handoverLogs: [] };
         let activeStatus = "Tất cả", activeGroup = "Tất cả tổ", searchMode = 'vehicle';
+        let map, markers = {}, mapInit = false;
 
         function clean(s) { if(!s) return ""; return String(s).replace(/\(.*?\)/g, '').replace(/\d{10,}/g, '').trim(); }
         function norm(s) { return String(s||'').replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); }
@@ -220,9 +243,91 @@
         function switchView(id) {
             document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
             document.getElementById(`view-${id}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', ['search','assets','handover','off','history'][i] === id));
-            document.getElementById('view-title').innerText = {search:'Tra cứu', assets:'Kiểm kê', handover:'Bàn giao', off:'Lịch OFF', history:'Lịch sử'}[id];
+            document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', ['search','map','assets','handover','off','history'][i] === id));
+            document.getElementById('view-title').innerText = {search:'Tra cứu', map:'Bản đồ Admin', assets:'Kiểm kê', handover:'Bàn giao', off:'Lịch OFF', history:'Lịch sử'}[id];
             if(id === 'search') applyFilter();
+            if(id === 'map') initAdminMap();
+        }
+
+        function initAdminMap() {
+            if(mapInit) return;
+            map = L.map('map').setView([10.7769, 106.7009], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            mapInit = true;
+            fetchLocations();
+            setInterval(fetchLocations, 10000); // Update every 10s
+        }
+
+        async function fetchLocations() {
+            try {
+                const res = await fetch(FIREBASE_URL + "locations.json");
+                const locations = await res.json();
+                updateMarkers(locations);
+            } catch(e) { console.error("Map Error", e); }
+        }
+
+        function updateMarkers(locations) {
+            if(!locations) return;
+            const keys = Object.keys(locations);
+            let vehicleList = [];
+            
+            keys.forEach(key => {
+                const loc = locations[key];
+                if(!loc.lat || !loc.lng) return;
+                vehicleList.push(loc);
+                
+                if(markers[key]) {
+                    markers[key].setLatLng([loc.lat, loc.lng]);
+                } else {
+                    const icon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="background:var(--ios-blue); width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`,
+                        iconSize: [12, 12]
+                    });
+                    markers[key] = L.marker([loc.lat, loc.lng], {icon: icon}).addTo(map)
+                        .bindPopup(`<b>${loc.name}</b><br>Tốc độ: ${loc.speed || 0} km/h`);
+                }
+            });
+            analyzeDensity(vehicleList);
+        }
+
+        function analyzeDensity(list) {
+            // Simple density check: find clusters
+            const CROWD_THRESHOLD = 3; // 3 cars in close proximity
+            const DISTANCE_THRESHOLD = 0.5; // km
+            
+            let crowdedAreas = 0;
+            let suggestions = [];
+
+            list.forEach((v1, i) => {
+                let count = 0;
+                list.forEach((v2, j) => {
+                    if(i === j) return;
+                    const d = getDist(v1.lat, v1.lng, v2.lat, v2.lng);
+                    if(d < DISTANCE_THRESHOLD) count++;
+                });
+                if(count >= CROWD_THRESHOLD) {
+                    crowdedAreas++;
+                    if(suggestions.length < 2) suggestions.push(`${v1.name} đang ở vùng đông xe, nên di chuyển ra khu vực thưa hơn.`);
+                }
+            });
+
+            const statusEl = document.getElementById('crowd-status');
+            const suggestEl = document.getElementById('dispatch-suggestions');
+            
+            if(crowdedAreas > 0) {
+                statusEl.innerHTML = `<span class="density-badge crowded">PHÁT HIỆN CỤM XE ĐÔNG</span> Hiện có ${crowdedAreas} khu vực tập trung đông xe.`;
+                suggestEl.innerHTML = suggestions.map(s => `<div class="dispatch-tip">💡 ${s}</div>`).join('');
+            } else {
+                statusEl.innerHTML = `<span class="density-badge sparse">MẬT ĐỘ TỐT</span> Xe đang phân bổ đều, không có khu vực ùn ứ.`;
+                suggestEl.innerHTML = '';
+            }
+        }
+
+        function getDist(lat1, lon1, lat2, lon2) {
+            const R = 6371; const dLat = (lat2-lat1)*Math.PI/180; const dLon = (lon2-lon1)*Math.PI/180;
+            const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
         function setSearchMode(m, el) {
