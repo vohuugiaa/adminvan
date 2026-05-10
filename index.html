@@ -375,7 +375,7 @@
                 else { stopped++; }
 
                 // TÌM Tên Tài xế AX từ dữ liệu xe (Sử dụng norm() để khớp tuyệt đối)
-                const carData = db.vehicles.find(v => norm(v['Biển số']) === norm(loc.name));
+                const carData = db.vehicles.find(v => norm(v[findKey(v, 'Biển số')]) === norm(loc.name));
                 const driverAX = carData ? (carData[findKey(carData, 'Tài xế AX')] || 'Chưa gán') : '---';
 
                 vehicleGroups[statusKey].push({ plate: loc.name, driver: driverAX, lat: loc.lat, lng: loc.lng });
