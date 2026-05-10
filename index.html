@@ -919,11 +919,11 @@
                 else if (speed > 0) { color = "var(--ios-yellow)"; idling++; statusKey = 'idling'; }
                 else { stopped++; }
 
-                // TÌM Tên Tài xế AX từ dữ liệu xe (Sử dụng norm() để khớp tuyệt đối)
+                // Lấy tên tài xế (Tìm linh hoạt cột có chữ "Tài xế")
                 const carData = db.vehicles.find(v => norm(v[findKey(v, 'Biển số')]) === norm(loc.name));
-                const driverAX = carData ? (carData[findKey(carData, 'Tài xế AX')] || 'Chưa gán') : '---';
+                const driverName = carData ? (carData[findKey(carData, 'Tài xế')] || 'Chưa gán') : '---';
 
-                vehicleGroups[statusKey].push({ plate: loc.name, driver: driverAX, lat: loc.lat, lng: loc.lng });
+                vehicleGroups[statusKey].push({ plate: loc.name, driver: driverName, lat: loc.lat, lng: loc.lng });
 
                 const icon = L.divIcon({
                     className: 'custom-div-icon',
@@ -931,7 +931,7 @@
                     iconSize: [14, 14]
                 });
 
-                const popupContent = `<b>${loc.name}</b><br><span style="color:var(--ios-blue);font-weight:700;">👤 ${driverAX}</span><br>Tốc độ: ${speed} km/h`;
+                const popupContent = `<b>${loc.name}</b><br><span style="color:var(--ios-blue);font-weight:700;">👤 ${driverName}</span><br>Tốc độ: ${speed} km/h`;
 
                 if (markers[key]) {
                     markers[key].setLatLng([loc.lat, loc.lng]);
@@ -1062,20 +1062,21 @@
                 if (qVeh) list = list.filter(v => norm(v['Biển số']).includes(qVeh) || norm(v['Số khung']).includes(qVeh));
                 listEl.innerHTML = list.length > 0 ? list.map(v => {
                     const st = v[findKey(v, 'Trạng thái cấp 2')] || 'N/A';
-                    const driverAX = v[findKey(v, 'Tài xế')] || 'Chưa gán';
+                    const driverName = v[findKey(v, 'Tài xế')] || 'Chưa gán';
                     const cl = st.toLowerCase().includes('vận doanh') ? 'st-vandoanh' : (st.toLowerCase().includes('nằm') ? 'st-xenam' : 'st-other');
                     return `
                         <div class="card">
                             <div class="list-item">
                                 <div class="item-main">
-                                    <div class="item-title">${v['Biển số'] || 'N/A'}</div>
-                                    <div class="item-sub" style="color:var(--ios-blue); font-weight:700; font-size:13px; margin:4px 0;">👤 ${driverAX}</div>
-                                    <div class="item-sub">Khung: ${v['Số khung'] || 'N/A'}</div>
+                                    <div class="item-title">${v[findKey(v, 'Biển số')] || 'N/A'}</div>
+                                    <div class="item-sub" style="color:var(--ios-blue); font-weight:700; font-size:13px; margin:4px 0;">👤 ${driverName}</div>
+                                    <div class="item-sub">Khung: ${v[findKey(v, 'Số khung')] || 'N/A'}</div>
                                 </div>
                                 <div class="status-badge ${cl}">${st}</div>
                             </div>
                         </div>`;
                 }).join('') : '<div style="text-align:center; padding:40px; color:#999;">Không tìm thấy xe.</div>';
+                
             } else {
                 let list = db.drivers;
                 if (qDrv) {
