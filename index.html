@@ -1059,18 +1059,26 @@
             if (searchMode === 'vehicle') {
                 let list = db.vehicles;
                 if (activeStatus !== "Tất cả") list = list.filter(v => (v[findKey(v, 'Trạng thái cấp 2')] || 'N/A') === activeStatus);
-                if (qVeh) list = list.filter(v => norm(v['Biển số']).includes(qVeh) || norm(v['Số khung']).includes(qVeh));
+                if (qVeh) list = list.filter(v => norm(v[findKey(v, 'Biển số')]).includes(qVeh) || norm(v[findKey(v, 'Số khung')]).includes(qVeh));
+                
+                // Tìm chìa khóa cột một lần duy nhất để tối ưu
+                const firstCar = list[0] || {};
+                const kPlate = findKey(firstCar, 'Biển số');
+                const kDriver = findKey(firstCar, 'Tài xế');
+                const kStatus = findKey(firstCar, 'Trạng thái cấp 2');
+                const kVin = findKey(firstCar, 'Số khung');
+
                 listEl.innerHTML = list.length > 0 ? list.map(v => {
-                    const st = v[findKey(v, 'Trạng thái cấp 2')] || 'N/A';
-                    const driverName = v[findKey(v, 'Tài xế')] || 'Chưa gán';
+                    const st = v[kStatus] || 'N/A';
+                    const driverName = v[kDriver] || 'Chưa gán';
                     const cl = st.toLowerCase().includes('vận doanh') ? 'st-vandoanh' : (st.toLowerCase().includes('nằm') ? 'st-xenam' : 'st-other');
                     return `
                         <div class="card">
                             <div class="list-item">
                                 <div class="item-main">
-                                    <div class="item-title">${v[findKey(v, 'Biển số')] || 'N/A'}</div>
+                                    <div class="item-title">${v[kPlate] || 'N/A'}</div>
                                     <div class="item-sub" style="color:var(--ios-blue); font-weight:700; font-size:13px; margin:4px 0;">👤 ${driverName}</div>
-                                    <div class="item-sub">Khung: ${v[findKey(v, 'Số khung')] || 'N/A'}</div>
+                                    <div class="item-sub">Khung: ${v[kVin] || 'N/A'}</div>
                                 </div>
                                 <div class="status-badge ${cl}">${st}</div>
                             </div>
