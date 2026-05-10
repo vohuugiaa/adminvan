@@ -7,7 +7,10 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
     <style>
         :root {
             --ios-blue: #007AFF;
@@ -230,7 +233,7 @@
         const FIREBASE_URL = "https://vanmap-live-default-rtdb.asia-southeast1.firebasedatabase.app/";
         let db = { vehicles: [], drivers: [], assets: [], offSchedule: [], handoverLogs: [] };
         let activeStatus = "Tất cả", activeGroup = "Tất cả tổ", searchMode = 'vehicle';
-        let map, markers = {}, mapInit = false;
+        let map, markers = {}, mapInit = false, clusterGroup;
 
         function clean(s) { if(!s) return ""; return String(s).replace(/\(.*?\)/g, '').replace(/\d{10,}/g, '').trim(); }
         function norm(s) { return String(s||'').replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); }
@@ -251,11 +254,16 @@
 
         function initAdminMap() {
             if(mapInit) return;
-            map = L.map('map').setView([10.7769, 106.7009], 13);
+            map = L.map('map').setView([10.7769, 106.7009], 12);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            clusterGroup = L.markerClusterGroup({
+                showCoverageOnHover: false,
+                maxClusterRadius: 50
+            });
+            map.addLayer(clusterGroup);
             mapInit = true;
             fetchLocations();
-            setInterval(fetchLocations, 10000); // Update every 10s
+            setInterval(fetchLocations, 10000);
         }
 
         async function fetchLocations() {
@@ -276,16 +284,26 @@
                 if(!loc.lat || !loc.lng) return;
                 vehicleList.push(loc);
                 
+                const speed = loc.speed || 0;
+                let color = "var(--ios-red)";
+                if(speed > 5) color = "var(--ios-green)";
+                else if(speed > 0) color = "var(--ios-yellow)";
+
+                const icon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div style="background:${color}; width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`,
+                    iconSize: [14, 14]
+                });
+
                 if(markers[key]) {
                     markers[key].setLatLng([loc.lat, loc.lng]);
+                    markers[key].setIcon(icon);
+                    markers[key].getPopup().setContent(`<b>${loc.name}</b><br>Tốc độ: ${speed} km/h`);
                 } else {
-                    const icon = L.divIcon({
-                        className: 'custom-div-icon',
-                        html: `<div style="background:var(--ios-blue); width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`,
-                        iconSize: [12, 12]
-                    });
-                    markers[key] = L.marker([loc.lat, loc.lng], {icon: icon}).addTo(map)
-                        .bindPopup(`<b>${loc.name}</b><br>Tốc độ: ${loc.speed || 0} km/h`);
+                    const m = L.marker([loc.lat, loc.lng], {icon: icon})
+                        .bindPopup(`<b>${loc.name}</b><br>Tốc độ: ${speed} km/h`);
+                    markers[key] = m;
+                    clusterGroup.addLayer(m);
                 }
             });
             analyzeDensity(vehicleList);
