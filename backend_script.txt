@@ -7,12 +7,17 @@ const MAIN_SS_ID = "15_vgd-bZPgcEj-l2r5uYGXXujKTyk-1XOGJ8eDAbhRw";
 const PARENT_FOLDER_ID = "1giAjJCqeALcAHy5RiG8WPeCpr0mAFqT8";
 
 function doGet(e) {
-  const action = e.parameter.action;
-  if (action === 'sync') {
-    return ContentService.createTextOutput(JSON.stringify(getAllData()))
+  try {
+    const action = e.parameter.action;
+    if (action === 'sync') {
+      return ContentService.createTextOutput(JSON.stringify(getAllData()))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    return ContentService.createTextOutput("EC VAN HỮU GIA Backend is running...");
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message }))
       .setMimeType(ContentService.MimeType.JSON);
   }
-  return ContentService.createTextOutput("EC VAN HỮU GIA Backend is running...");
 }
 
 function doPost(e) {
@@ -101,8 +106,7 @@ function getAllData() {
   return {
     vehicles: getSheetData(mainSS, "Danh sách xe"),
     drivers: getSheetData(mainSS, "Danh sách tài xế"),
-    assets: getSheetData(mainSS, "Tài sản theo xe"),
-    handoverLogs: getSheetData(mainSS, "Lịch sử bàn giao")
+    assets: getSheetData(mainSS, "Tài sản theo xe")
   };
 }
 
