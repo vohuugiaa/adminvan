@@ -9,7 +9,6 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -927,43 +926,6 @@
             </div>
         </div>
 
-        <div id="view-handover" class="hidden">
-            <div class="section-title">Thông tin phương tiện</div>
-            <div class="form-group">
-                <div class="form-row">
-                    <label>Biển số</label>
-                    <input type="text" id="h-plate" placeholder="Gõ biển số..."
-                        oninput="suggestSmart(this, 'suggest-h-plate', 'plate')">
-                    <div id="suggest-h-plate" class="suggest-box show-top hidden"></div>
-                </div>
-                <div class="form-row"><label>Số ODO</label><input type="number" id="h-odo" placeholder="Số KM hiện tại">
-                </div>
-            </div>
-            <div class="section-title">Nhân sự bàn giao</div>
-            <div class="form-group">
-                <div class="form-row">
-                    <label>Người giao</label>
-                    <input type="text" id="h-sender" placeholder="Họ tên hoặc MSNV..."
-                        oninput="suggestSmart(this, 'suggest-h-sender', 'driver')">
-                    <div id="suggest-h-sender" class="suggest-box show-top hidden"></div>
-                </div>
-                <div class="form-row">
-                    <label>Người nhận</label>
-                    <input type="text" id="h-receiver" placeholder="Họ tên hoặc MSNV..."
-                        oninput="suggestSmart(this, 'suggest-h-receiver', 'driver')">
-                    <div id="suggest-h-receiver" class="suggest-box show-top hidden"></div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="form-row"><label>Ghi chú</label><input type="text" id="h-notes"
-                        placeholder="Tình trạng xe..."></div>
-            </div>
-            <div class="photo-box" onclick="document.getElementById('h-cam').click()">📸 CHỤP BIÊN BẢN<img id="h-prev"
-                    class="hidden"><input type="file" id="h-cam" accept="image/*" capture="environment" class="hidden"
-                    onchange="previewImg(this)"></div>
-            <button class="btn-ios" onclick="processHandover()">XÁC NHẬN BÀN GIAO</button>
-        </div>
-
         <div id="view-off" class="hidden">
             <div class="form-group" style="margin-top:20px;">
                 <div class="form-row"><label>Ngày OFF</label><input type="date" id="off-date-picker"
@@ -997,31 +959,13 @@
                 <button class="btn-locate" onclick="locateMe()">📍</button>
             </div>
         </div>
-
-        <div id="view-dashboard" class="hidden">
-            <div class="section-title">Hiệu suất đội xe</div>
-            <div class="card" style="padding: 20px;">
-                <canvas id="chart-status" style="max-height: 250px;"></canvas>
-            </div>
-            <div class="section-title">Tần suất bàn giao (7 ngày qua)</div>
-            <div class="card" style="padding: 20px;">
-                <canvas id="chart-handover" style="max-height: 200px;"></canvas>
-            </div>
-        </div>
-
-        <div id="view-history" class="hidden">
-            <div id="list-history"></div>
-        </div>
     </div>
 
     <nav>
         <div class="nav-item active" onclick="switchView('search')"><i>🔍</i><span>Tra cứu</span></div>
         <div class="nav-item" onclick="switchView('map')"><i>📍</i><span>Bản đồ</span></div>
-        <div class="nav-item" onclick="switchView('dashboard')"><i>📊</i><span>Báo cáo</span></div>
         <div class="nav-item" onclick="switchView('assets')"><i>📦</i><span>Kiểm kê</span></div>
-        <div class="nav-item" onclick="switchView('handover')"><i>📝</i><span>Bàn giao</span></div>
         <div class="nav-item" onclick="switchView('off')"><i>📅</i><span>Lịch OFF</span></div>
-        <div class="nav-item" onclick="switchView('history')"><i>📜</i><span>Lịch sử</span></div>
     </nav>
 
     <script>
@@ -1033,7 +977,24 @@
 
         function clean(s) { if (!s) return ""; return String(s).replace(/\(.*?\)/g, '').replace(/\d{10,}/g, '').trim(); }
         function norm(s) { return String(s || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase(); }
-        function findKey(obj, pattern) { return Object.keys(obj).find(k => k.toLowerCase().includes(pattern.toLowerCase())) || ''; }
+        function findKey(obj, pattern) {
+            if (!obj) return '';
+            const keys = Object.keys(obj);
+            // 1. Exact match case-insensitive
+            let found = keys.find(k => k.toLowerCase() === pattern.toLowerCase());
+            if (found) return found;
+            // 2. Includes pattern case-insensitive
+            found = keys.find(k => k.toLowerCase().includes(pattern.toLowerCase()));
+            if (found) return found;
+            // 3. Special aliases
+            if (pattern.toLowerCase() === 'biển số') {
+                found = keys.find(k => k.toLowerCase().includes('bks') || k.toLowerCase().includes('biển'));
+            }
+            if (pattern.toLowerCase() === 'tài xế') {
+                found = keys.find(k => k.toLowerCase().includes('driver') || k.toLowerCase().includes('tên') || k.toLowerCase().includes('xế'));
+            }
+            return found || '';
+        }
 
         async function openDB() { return new Promise(res => { const r = indexedDB.open('XanhProERP_V12_ULTRA', 1); r.onupgradeneeded = () => r.result.createObjectStore('data'); r.onsuccess = () => res(r.result); }); }
         async function saveDB(d) { const idb = await openDB(); idb.transaction('data', 'readwrite').objectStore('data').put(d, 'db'); }
@@ -1042,51 +1003,10 @@
         function switchView(id) {
             document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
             document.getElementById(`view-${id}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', ['search', 'map', 'dashboard', 'assets', 'handover', 'off', 'history'][i] === id));
-            document.getElementById('view-title').innerText = { search: 'Tra cứu', map: 'Bản đồ Admin', dashboard: 'Phân tích', assets: 'Kiểm kê', handover: 'Bàn giao', off: 'Lịch OFF', history: 'Lịch sử' }[id];
+            document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', ['search', 'map', 'assets', 'off'][i] === id));
+            document.getElementById('view-title').innerText = { search: 'Tra cứu', map: 'Bản đồ Admin', assets: 'Kiểm kê', off: 'Lịch OFF' }[id];
             if (id === 'search') applyFilter();
             if (id === 'map') initAdminMap();
-            if (id === 'dashboard') initDashboard();
-        }
-
-        let charts = {};
-        function initDashboard() {
-            if (charts.status) charts.status.destroy();
-            if (charts.handover) charts.handover.destroy();
-
-            const statusCounts = { 'Vận doanh': 0, 'Nằm bãi': 0, 'Khác': 0 };
-            db.vehicles.forEach(v => {
-                const st = v[findKey(v, 'Trạng thái cấp 2')] || 'Khác';
-                if (st.includes('Vận doanh')) statusCounts['Vận doanh']++;
-                else if (st.includes('Nằm')) statusCounts['Nằm bãi']++;
-                else statusCounts['Khác']++;
-            });
-
-            charts.status = new Chart(document.getElementById('chart-status'), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(statusCounts),
-                    datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#30D158', '#FF453A', '#AEAEB2'] }]
-                },
-                options: { plugins: { title: { display: true, text: 'Trạng thái đội xe' } } }
-            });
-
-            // Handover history last 7 days
-            const labels = [], counts = [];
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                const ds = d.toLocaleDateString('vi-VN');
-                labels.push(ds.split('/')[0] + '/' + ds.split('/')[1]);
-                counts.push(db.handoverLogs.filter(l => l[findKey(l, 'Ngày bàn giao')] === ds).length);
-            }
-
-            charts.handover = new Chart(document.getElementById('chart-handover'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{ label: 'Lượt bàn giao', data: counts, backgroundColor: '#007AFF' }]
-                }
-            });
         }
 
         function initAdminMap() {
@@ -1300,18 +1220,6 @@
             const groups = ["Tất cả tổ", ...new Set(db.offSchedule.map(o => o[findKey(o, 'tổ')] || 'N/A'))];
             document.getElementById('group-filters').innerHTML = groups.map(g => `<div class="pill ${activeGroup === g ? 'active' : ''}" onclick="filterByGroup('${g}')">${g}</div>`).join('');
             applyFilter(); applyOffFilter();
-            document.getElementById('list-history').innerHTML = (db.handoverLogs || []).slice(-15).reverse().map(l => `
-                <div class="card">
-                    <div class="list-item">
-                        <div class="item-main">
-                            <div class="item-title">${l['Biển số xe']}</div>
-                            <div class="item-sub">${clean(l['Người giao'])} → ${clean(l['Người nhận'])}</div>
-                            <div style="font-size:11px; color:#999; margin-top:5px;">ODO: ${l['Số KM (ODO)']} KM</div>
-                            ${l['Link ảnh biên bản'] ? `<a href="${l['Link ảnh biên bản']}" target="_blank" style="font-size:12px; color:var(--ios-blue); font-weight:800; display:block; margin-top:8px;">📂 XEM BIÊN BẢN</a>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
         }
 
         function filterByStatus(s) { activeStatus = s; applyFilter(); renderAll(); }
@@ -1439,39 +1347,6 @@
                 if (displayEl) displayEl.classList.remove('hidden');
             }
             if (inputEl.id === 'q-search') applyFilter();
-        }
-
-        function previewImg(i) { if (i.files && i.files[0]) { const r = new FileReader(); r.onload = e => { document.getElementById('h-prev').src = e.target.result; document.getElementById('h-prev').classList.remove('hidden'); }; r.readAsDataURL(i.files[0]); } }
-
-        async function processHandover() {
-            const p = document.getElementById('h-plate').value, o = document.getElementById('h-odo').value, s = document.getElementById('h-sender').value, r = document.getElementById('h-receiver').value, n = document.getElementById('h-notes').value;
-            if (!p || !o) return alert("Thiếu Biển số/ODO!");
-            document.getElementById('overlay').classList.remove('hidden');
-            const payload = { licensePlate: p, mileage: o, sender: s || "N/A", receiver: r || "N/A", notes: n, actualDate: new Date().toLocaleDateString('vi-VN'), image: document.getElementById('h-prev').src.startsWith('data') ? document.getElementById('h-prev').src : null };
-            try {
-                const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-                const result = await res.json();
-                if (result.success) {
-                    showSuccess();
-                    // Clear form
-                    document.getElementById('h-plate').value = '';
-                    document.getElementById('h-odo').value = '';
-                    document.getElementById('h-sender').value = '';
-                    document.getElementById('h-receiver').value = '';
-                    document.getElementById('h-notes').value = '';
-                    document.getElementById('h-prev').classList.add('hidden');
-                    syncData();
-                } else {
-                    alert("❌ Lỗi: " + (result.error || "Không xác định"));
-                }
-            } catch (e) { alert("❌ Lỗi kết nối máy chủ!"); }
-            finally { document.getElementById('overlay').classList.add('hidden'); }
-        }
-
-        function showSuccess() {
-            const popup = document.getElementById('success-popup');
-            popup.classList.add('show');
-            setTimeout(() => { popup.classList.remove('show'); switchView('history'); }, 2000);
         }
 
         async function toggleAsset(plate, item, checked) {
