@@ -1071,7 +1071,11 @@
                 else { stopped++; }
 
                 // Lấy tên tài xế (Tìm linh hoạt cột có chữ "Tài xế")
-                const carData = db.vehicles.find(v => norm(v[findKey(v, 'Biển số')]) === norm(loc.name));
+                const carData = db.vehicles.find(v => {
+                    const dbPlate = norm(v[findKey(v, 'Biển số')]);
+                    const locPlate = norm(loc.name).replace(/^xe/, '');
+                    return dbPlate && locPlate && (dbPlate === locPlate || dbPlate.includes(locPlate) || locPlate.includes(dbPlate));
+                });
                 const driverName = carData ? (carData[findKey(carData, 'Tài xế')] || 'Chưa gán') : '---';
 
                 vehicleGroups[statusKey].push({ plate: loc.name, driver: driverName, lat: loc.lat, lng: loc.lng });
